@@ -1,26 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
-
-interface Node {
-  id: string;
-  x: number;
-  y: number;
-}
-
-interface Edge {
-  from: string;
-  to: string;
-}
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import type { Node } from "./types";
+import NodeComponent from "./components/NodeComponent";
 
 const initialNodes: Node[] = [
   { id: "Node1", x: 100, y: 100 },
   { id: "Node2", x: 300, y: 100 },
 ];
 
-const initialEdges: Edge[] = [{ from: "Node1", to: "Node2" }];
-
 function App() {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [draggedNodeId, setDraggedNodeId] = React.useState<string | null>(null);
   const offset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -32,8 +20,8 @@ function App() {
             node.id === draggedNodeId
               ? {
                   ...node,
-                  x: e.clientX - offset.current.x,
-                  y: e.clientY - offset.current.y,
+                  x: e.pageX - offset.current.x,
+                  y: e.pageY - offset.current.y,
                 }
               : node
           )
@@ -51,6 +39,10 @@ function App() {
     };
   }, [draggedNodeId]);
 
+  const handleSetDraggedNodeId = useCallback((id: string | null) => {
+    setDraggedNodeId(id);
+  }, []);
+
   return (
     <div
       style={{
@@ -58,29 +50,17 @@ function App() {
         height: "100vh",
         backgroundColor: "#f0f0f0",
         position: "relative",
+        overflow: "auto",
       }}
     >
       {nodes.map((node) => (
-        <div
+        <NodeComponent
           key={node.id}
-          style={{
-            position: "absolute",
-            left: node.x,
-            top: node.y,
-            width: 80,
-            height: 40,
-            border: "1px solid #000",
-          }}
-          onMouseDown={(e) => {
-            setDraggedNodeId(node.id);
-            offset.current = {
-              x: e.clientX - node.x,
-              y: e.clientY - node.y,
-            };
-          }}
-        >
-          {node.id}
-        </div>
+          node={node}
+          setDraggedNodeId={handleSetDraggedNodeId}
+          offset={offset}
+          isDragging={draggedNodeId === node.id}
+        />
       ))}
     </div>
   );

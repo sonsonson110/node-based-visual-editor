@@ -10,5 +10,12 @@
 - Node positions update in real time as you drag.
 - Code is simple and easy to extend for future phases.
 
+
 ---
-Next phases will be documented here as features are added.
+
+### Phase 1 Improvements
+
+- Node rendering logic extracted to `NodeComponent` for better modularity.
+- Drag-and-drop logic handled via props and mouse events in `NodeComponent`.
+- Types for nodes are now defined in `types.ts` and used consistently.
+- Visual feedback added: node border changes color when dragging.
