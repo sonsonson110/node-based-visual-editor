@@ -3,3 +3,8 @@ export interface Node {
   x: number;
   y: number;
 }
+
+export interface Edge {
+  from: string;
+  to: string;
+}
