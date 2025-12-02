@@ -1,5 +1,6 @@
 import React, { type RefObject } from "react";
 import type { Node } from "../types";
+import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 
 interface NodeComponentProps {
   node: Node;
@@ -15,8 +16,8 @@ const NodeComponent: React.FC<NodeComponentProps> = ({ node, setDraggedNodeId, o
         position: "absolute",
         left: node.x,
         top: node.y,
-        width: 80,
-        height: 40,
+        width: NODE_WIDTH,
+        height: NODE_HEIGHT,
         border: isDragging ? "2px solid red" : "1px solid #000",
         background: "#fff",
         display: "flex",

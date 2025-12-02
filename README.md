@@ -23,3 +23,13 @@
 - Implemented edge rendering in `App.tsx` using SVG paths between node centers.
 - Created `getNodeCenter` utility for accurate edge connections.
 - Edges now visually connect nodes on the canvas.
+
+### Phase 2 Improvements
+
+- Edge rendering logic extracted to `EdgeComponent` for better modularity.
+- Edges now connect to the sides of nodes (right side of the source to the left side of the target) for a clearer, more directional flow.
+- Added `getNodeCenterLeft` and `getNodeCenterRight` utility functions to calculate the new connection points.
+- nodeMap memoization — removes O(N) lookups per edge
+- Edge path math: straight segments + cubic curve (aesthetic + readable).
+- Marker arrowhead implementation
+- Use an requestAnimationFrame throttle to cap updates to the display refresh rate

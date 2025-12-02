@@ -1,7 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import type { Edge, Node } from "./types";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
-import { getNodeCenter } from "./utils";
+import type { Edge, Node } from "./types";
 
 const initialNodes: Node[] = [
   { id: "Node1", x: 100, y: 100 },
@@ -15,10 +21,21 @@ function App() {
   const [edges, setEdges] = useState<Edge[]>(initialEdges);
   const [draggedNodeId, setDraggedNodeId] = React.useState<string | null>(null);
   const offset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  const animationFrameRef = useRef<number>(null);
+
+  const nodeMap = useMemo(() => {
+    const map = new Map();
+    nodes.forEach((node) => map.set(node.id, node));
+    return map;
+  }, [nodes]);
 
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
-      if (draggedNodeId) {
+      if (!draggedNodeId) return;
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      animationFrameRef.current = requestAnimationFrame(() => {
         setNodes((prevNodes) =>
           prevNodes.map((node) =>
             node.id === draggedNodeId
@@ -30,9 +47,12 @@ function App() {
               : node
           )
         );
-      }
+      });
     }
     function handleMouseUp() {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
       setDraggedNodeId(null);
     }
     window.addEventListener("mousemove", handleMouseMove);
@@ -40,6 +60,9 @@ function App() {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
     };
   }, [draggedNodeId]);
 
@@ -58,21 +81,29 @@ function App() {
       }}
     >
       <svg style={{ position: "absolute", width: "100%", height: "100%" }}>
+        <defs>
+          <marker
+            id="triangle"
+            viewBox="0 0 10 10"
+            refX="8"
+            refY="5"
+            markerWidth="6"
+            markerHeight="6"
+            orient="auto"
+          >
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="black" />
+          </marker>
+        </defs>
+
         {edges.map((edge, i) => {
-          const fromNode = nodes.find((n) => n.id === edge.from);
-          const toNode = nodes.find((n) => n.id === edge.to);
+          const fromNode = nodeMap.get(edge.from);
+          const toNode = nodeMap.get(edge.to);
           if (!fromNode || !toNode) return null;
-
-          const { cx: x1, cy: y1 } = getNodeCenter(fromNode);
-          const { cx: x2, cy: y2 } = getNodeCenter(toNode);
-
           return (
-            <path
-              key={i}
-              d={`M ${x1} ${y1} Q ${(x1 + x2) / 2} ${y1} ${x2} ${y2}`}
-              stroke="black"
-              strokeWidth={2}
-              fill="none"
+            <EdgeComponent
+              key={`${edge.from}->${edge.to}`}
+              fromNode={fromNode}
+              toNode={toNode}
             />
           );
         })}
