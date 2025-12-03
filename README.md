@@ -33,3 +33,14 @@
 - Edge path math: straight segments + cubic curve (aesthetic + readable).
 - Marker arrowhead implementation
 - Use an requestAnimationFrame throttle to cap updates to the display refresh rate
+
+
+## Phase 3: Viewport System (Panning & Zooming)
+
+- Introduced the concept of a **camera/viewport** separate from world space.
+- Implemented panning behavior by shifting the viewport’s x/y translation.
+- Added zooming functionality using mouse wheel scroll, scaling the world container.
+- Created `WorldContainer` to apply transforms to both nodes and edges together.
+- Nodes and edges remain visually consistent and correctly positioned during zoom & pan.
+- Disabled the browser native right-click menu to allow context-based interactions later.
+- Middle/left-click now pans smoothly across the world while left-click continues to drag nodes.

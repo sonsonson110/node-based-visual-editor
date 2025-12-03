@@ -8,3 +8,9 @@ export interface Edge {
   from: string;
   to: string;
 }
+
+export interface Viewport {
+  x: number;
+  y: number;
+  zoom: number;
+}

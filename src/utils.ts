@@ -1,5 +1,5 @@
 import { NODE_HALF_HEIGHT, NODE_HALF_WIDTH, NODE_WIDTH } from "./constants";
-import type { Node } from "./types";
+import type { Node, Viewport } from "./types";
 
 export function getNodeCenter(node: Node) {
   return {
@@ -19,5 +19,16 @@ export function getNodeCenterRight(node: Node) {
   return {
     cx: node.x + NODE_WIDTH,
     cy: node.y + NODE_HALF_HEIGHT,
+  };
+}
+
+export function screenToWorld(
+  screenX: number,
+  screenY: number,
+  viewport: Viewport
+) {
+  return {
+    x: (screenX - viewport.x) / viewport.zoom,
+    y: (screenY - viewport.y) / viewport.zoom,
   };
 }

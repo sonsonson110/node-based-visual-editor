@@ -1,15 +1,18 @@
-import React, { type RefObject } from "react";
-import type { Node } from "../types";
+import React from "react";
 import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
+import type { Node } from "../types";
 
 interface NodeComponentProps {
   node: Node;
-  setDraggedNodeId: (id: string | null) => void;
-  offset: RefObject<{ x: number; y: number }>;
   isDragging: boolean;
+  onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
-const NodeComponent: React.FC<NodeComponentProps> = ({ node, setDraggedNodeId, offset: offsetRef, isDragging }) => {
+const NodeComponent: React.FC<NodeComponentProps> = ({
+  node,
+  isDragging,
+  onMouseDown,
+}) => {
   return (
     <div
       style={{
@@ -25,14 +28,9 @@ const NodeComponent: React.FC<NodeComponentProps> = ({ node, setDraggedNodeId, o
         justifyContent: "center",
         cursor: isDragging ? "grabbing" : "grab",
         userSelect: "none",
+        pointerEvents: "auto",
       }}
-      onMouseDown={(e) => {
-        setDraggedNodeId(node.id);
-        offsetRef.current = {
-          x: e.pageX - node.x,
-          y: e.pageY - node.y,
-        };
-      }}
+      onMouseDown={onMouseDown}
     >
       {node.id}
     </div>
