@@ -32,3 +32,14 @@ export function screenToWorld(
     y: (screenY - viewport.y) / viewport.zoom,
   };
 }
+
+export function worldToScreen(
+  worldX: number,
+  worldY: number,
+  viewport: Viewport
+) {
+  return {
+    x: worldX * viewport.zoom + viewport.x,
+    y: worldY * viewport.zoom + viewport.y,
+  };
+}

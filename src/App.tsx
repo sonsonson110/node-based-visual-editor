@@ -1,22 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
-import { RootContainer, SVGContainer, WorldContainer } from "./styled";
+import {
+  InputGroup,
+  PositionDisplay,
+  RootContainer,
+  SVGContainer,
+  UIContainer,
+  WorldContainer,
+} from "./styled";
 import type { Edge, Node, Viewport } from "./types";
 import { screenToWorld } from "./utils";
 
 const initialNodes: Node[] = [
-  { id: "Node1", x: 100, y: 100 },
-  { id: "Node2", x: 300, y: 100 },
-  { id: "Node3", x: 400, y: 100 },
-  { id: "Node4", x: 200, y: 100 },
+  { id: "1", x: 100, y: 100 },
+  { id: "2", x: 300, y: 100 },
 ];
 
-const initialEdges: Edge[] = [
-  { from: "Node1", to: "Node2" },
-  { from: "Node2", to: "Node3" },
-  { from: "Node2", to: "Node4" },
-];
+const initialEdges: Edge[] = [{ from: "1", to: "2" }];
 
 function App() {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
@@ -39,6 +40,54 @@ function App() {
     nodes.forEach((node) => map.set(node.id, node));
     return map;
   }, [nodes]);
+
+  const [newNodeId, setNewNodeId] = useState("");
+  const [fromNode, setFromNode] = useState("");
+  const [toNode, setToNode] = useState("");
+
+  const draggedNode = useMemo(() => {
+    if (!draggedNodeId) return null;
+    return nodeMap.get(draggedNodeId);
+  }, [draggedNodeId, nodeMap]);
+
+  const handleAddNode = () => {
+    if (!newNodeId.trim()) {
+      alert("Node ID cannot be empty.");
+      return;
+    }
+    if (nodeMap.has(newNodeId)) {
+      alert(`Node with ID "${newNodeId}" already exists.`);
+      return;
+    }
+
+    const screenCenter = {
+      x: window.innerWidth / 2,
+      y: window.innerHeight / 2,
+    };
+    const worldPos = screenToWorld(screenCenter.x, screenCenter.y, viewport);
+
+    const newNode: Node = { id: newNodeId, x: worldPos.x, y: worldPos.y };
+    setNodes((prev) => [...prev, newNode]);
+    setNewNodeId("");
+  };
+
+  const handleAddEdge = () => {
+    if (!fromNode || !toNode) {
+      alert("Please specify both 'from' and 'to' nodes.");
+      return;
+    }
+    if (!nodeMap.has(fromNode) || !nodeMap.has(toNode)) {
+      alert("One or both nodes do not exist.");
+      return;
+    }
+    if (edges.some((edge) => edge.from === fromNode && edge.to === toNode)) {
+      alert("This edge already exists.");
+      return;
+    }
+    setEdges((prev) => [...prev, { from: fromNode, to: toNode }]);
+    setFromNode("");
+    setToNode("");
+  };
 
   // Prevent default context menu
   useEffect(() => {
@@ -91,6 +140,7 @@ function App() {
   // Panning logic - mousedown handler
   useEffect(() => {
     function handleMouseDown(e: MouseEvent) {
+      if (draggedNodeId) return;
       if (e.button === 1 || e.button === 2) {
         setIsPanning(true);
         panStart.current = { x: e.pageX - viewport.x, y: e.pageY - viewport.y };
@@ -100,7 +150,7 @@ function App() {
     return () => {
       document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [viewport.x, viewport.y]);
+  }, [draggedNodeId, viewport.x, viewport.y]);
 
   // Panning logic - mousemove and mouseup handlers
   useEffect(() => {
@@ -127,18 +177,16 @@ function App() {
   useEffect(() => {
     function handleWheel(e: WheelEvent) {
       e.preventDefault();
-      const mouseX = e.pageX;
-      const mouseY = e.pageY;
+      const mouseWorld = screenToWorld(e.pageX, e.pageY, viewport);
       setViewport((prev) => {
         const newZoom = Math.min(
           3,
           Math.max(0.3, prev.zoom * (1 - e.deltaY * 0.001))
         );
-        const scale = newZoom / prev.zoom;
         return {
           zoom: newZoom,
-          x: mouseX - (mouseX - prev.x) * scale,
-          y: mouseY - (mouseY - prev.y) * scale,
+          x: e.pageX - mouseWorld.x * newZoom,
+          y: e.pageY - mouseWorld.y * newZoom,
         };
       });
     }
@@ -146,10 +194,45 @@ function App() {
     return () => {
       document.removeEventListener("wheel", handleWheel);
     };
-  }, []);
+  }, [viewport]);
 
   return (
     <RootContainer>
+      <UIContainer>
+        <InputGroup>
+          <input
+            type="text"
+            placeholder="New Node ID"
+            value={newNodeId}
+            onChange={(e) => setNewNodeId(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddNode()}
+          />
+          <button onClick={handleAddNode}>Add Node</button>
+        </InputGroup>
+        <InputGroup>
+          <input
+            type="text"
+            placeholder="From Node ID"
+            value={fromNode}
+            onChange={(e) => setFromNode(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="To Node ID"
+            value={toNode}
+            onChange={(e) => setToNode(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
+          />
+          <button onClick={handleAddEdge}>Add Edge</button>
+        </InputGroup>
+      </UIContainer>
+
+      {draggedNode && (
+        <PositionDisplay>
+          {draggedNode.id}: ({draggedNode.x.toFixed(0)},{" "}
+          {draggedNode.y.toFixed(0)})
+        </PositionDisplay>
+      )}
       <WorldContainer
         style={{
           transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
