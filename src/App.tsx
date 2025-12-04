@@ -88,7 +88,7 @@ function App() {
     };
   }, [draggedNodeId, viewport]);
 
-  // Panning logic
+  // Panning logic - mousedown handler
   useEffect(() => {
     function handleMouseDown(e: MouseEvent) {
       if (e.button === 1 || e.button === 2) {
@@ -96,6 +96,14 @@ function App() {
         panStart.current = { x: e.pageX - viewport.x, y: e.pageY - viewport.y };
       }
     }
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
+  }, [viewport.x, viewport.y]);
+
+  // Panning logic - mousemove and mouseup handlers
+  useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (!isPanning) return;
       setViewport((prev) => ({
@@ -107,15 +115,13 @@ function App() {
     function handleMouseUp() {
       setIsPanning(false);
     }
-    document.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
     return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isPanning, viewport.x, viewport.y]);
+  }, [isPanning]);
 
   // Zooming logic
   useEffect(() => {
