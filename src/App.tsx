@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
@@ -6,9 +6,13 @@ import { useAppDispatch, useAppSelector } from "./hooks";
 import {
   selectDraggedNodeId,
   selectEdges,
+  selectIsPanning,
   selectNodes,
+  selectViewport,
   setDraggedNodeId,
+  setIsPanning,
   setNodes,
+  setViewport,
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -16,21 +20,15 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
-import type { Viewport } from "./types";
 import { screenToWorld } from "./utils";
 
 function App() {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const edges = useAppSelector(selectEdges);
+  const viewport = useAppSelector(selectViewport);
   const draggedNodeId = useAppSelector(selectDraggedNodeId);
-
-  const [viewport, setViewport] = useState<Viewport>({
-    x: 0,
-    y: 0,
-    zoom: 1,
-  });
-  const [isPanning, setIsPanning] = useState(false);
+  const isPanning = useAppSelector(selectIsPanning);
 
   const offset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const animationFrameRef = useRef<number>(null);
@@ -101,7 +99,7 @@ function App() {
     function handleMouseDown(e: MouseEvent) {
       if (draggedNodeId) return;
       if (e.button === 1 || e.button === 2) {
-        setIsPanning(true);
+        dispatch(setIsPanning(true));
         panStart.current = { x: e.pageX - viewport.x, y: e.pageY - viewport.y };
       }
     }
@@ -109,20 +107,22 @@ function App() {
     return () => {
       document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [draggedNodeId, viewport.x, viewport.y]);
+  }, [dispatch, draggedNodeId, viewport.x, viewport.y]);
 
   // Panning logic - mousemove and mouseup handlers
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (!isPanning) return;
-      setViewport((prev) => ({
-        ...prev,
-        x: e.pageX - panStart.current.x,
-        y: e.pageY - panStart.current.y,
-      }));
+      dispatch(
+        setViewport({
+          ...viewport,
+          x: e.pageX - panStart.current.x,
+          y: e.pageY - panStart.current.y,
+        })
+      );
     }
     function handleMouseUp() {
-      setIsPanning(false);
+      dispatch(setIsPanning(false));
     }
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -130,23 +130,21 @@ function App() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isPanning]);
+  }, [dispatch, isPanning, viewport]);
 
   // Zooming logic
   useEffect(() => {
     function handleWheel(e: WheelEvent) {
       e.preventDefault();
       const mouseWorld = screenToWorld(e.pageX, e.pageY, viewport);
-      setViewport((prev) => {
-        const newZoom = Math.min(
-          3,
-          Math.max(0.3, prev.zoom * (1 - e.deltaY * 0.001))
-        );
-        return {
-          zoom: newZoom,
-          x: e.pageX - mouseWorld.x * newZoom,
-          y: e.pageY - mouseWorld.y * newZoom,
-        };
+      const newZoom = Math.min(
+        3,
+        Math.max(0.3, viewport.zoom * (1 - e.deltaY * 0.001))
+      );
+      setViewport({
+        zoom: newZoom,
+        x: e.pageX - mouseWorld.x * newZoom,
+        y: e.pageY - mouseWorld.y * newZoom,
       });
     }
     document.addEventListener("wheel", handleWheel, { passive: false });

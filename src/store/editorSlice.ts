@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { Node, Edge, Viewport } from "../types";
 import type { RootState } from "../store";
+import { NODE_WIDTH } from "../constants";
 
 interface EditorState {
   nodes: Node[];
@@ -10,10 +11,13 @@ interface EditorState {
   isPanning: boolean;
 }
 
+const SCREEN_WIDTH = window.innerWidth;
+const SCREEN_HEIGHT = window.innerHeight;
+
 const initialState: EditorState = {
   nodes: [
-    { id: "1", x: 300, y: 100 },
-    { id: "2", x: 300, y: 300 },
+    { id: "1", x: SCREEN_WIDTH / 2 - NODE_WIDTH, y: SCREEN_HEIGHT / 2 },
+    { id: "2", x: SCREEN_WIDTH / 2 + NODE_WIDTH, y: SCREEN_HEIGHT / 2 },
   ],
   edges: [{ from: "1", to: "2" }],
   draggedNodeId: null,
