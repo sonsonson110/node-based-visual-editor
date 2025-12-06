@@ -19,6 +19,11 @@ export const UIContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
+  user-select: none;
+
+  input {
+    user-select: text;
+  }
 `;
 
 export const InputGroup = styled.div`

@@ -1,28 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
+import { useAppDispatch, useAppSelector } from "./hooks";
 import {
-  InputGroup,
+  selectDraggedNodeId,
+  selectEdges,
+  selectNodes,
+  setDraggedNodeId,
+  setNodes,
+} from "./store/editorSlice";
+import {
   PositionDisplay,
   RootContainer,
   SVGContainer,
-  UIContainer,
   WorldContainer,
 } from "./styled";
-import type { Edge, Node, Viewport } from "./types";
+import type { Viewport } from "./types";
 import { screenToWorld } from "./utils";
 
-const initialNodes: Node[] = [
-  { id: "1", x: 100, y: 100 },
-  { id: "2", x: 300, y: 100 },
-];
-
-const initialEdges: Edge[] = [{ from: "1", to: "2" }];
-
 function App() {
-  const [nodes, setNodes] = useState<Node[]>(initialNodes);
-  const [edges, setEdges] = useState<Edge[]>(initialEdges);
-  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+  const nodes = useAppSelector(selectNodes);
+  const edges = useAppSelector(selectEdges);
+  const draggedNodeId = useAppSelector(selectDraggedNodeId);
 
   const [viewport, setViewport] = useState<Viewport>({
     x: 0,
@@ -35,59 +36,15 @@ function App() {
   const animationFrameRef = useRef<number>(null);
   const panStart = useRef({ x: 0, y: 0 });
 
-  const nodeMap = useMemo(() => {
-    const map = new Map();
-    nodes.forEach((node) => map.set(node.id, node));
-    return map;
-  }, [nodes]);
-
-  const [newNodeId, setNewNodeId] = useState("");
-  const [fromNode, setFromNode] = useState("");
-  const [toNode, setToNode] = useState("");
+  const nodeMap = useMemo(
+    () => new Map(nodes.map((node) => [node.id, node])),
+    [nodes]
+  );
 
   const draggedNode = useMemo(() => {
     if (!draggedNodeId) return null;
     return nodeMap.get(draggedNodeId);
   }, [draggedNodeId, nodeMap]);
-
-  const handleAddNode = () => {
-    if (!newNodeId.trim()) {
-      alert("Node ID cannot be empty.");
-      return;
-    }
-    if (nodeMap.has(newNodeId)) {
-      alert(`Node with ID "${newNodeId}" already exists.`);
-      return;
-    }
-
-    const screenCenter = {
-      x: window.innerWidth / 2,
-      y: window.innerHeight / 2,
-    };
-    const worldPos = screenToWorld(screenCenter.x, screenCenter.y, viewport);
-
-    const newNode: Node = { id: newNodeId, x: worldPos.x, y: worldPos.y };
-    setNodes((prev) => [...prev, newNode]);
-    setNewNodeId("");
-  };
-
-  const handleAddEdge = () => {
-    if (!fromNode || !toNode) {
-      alert("Please specify both 'from' and 'to' nodes.");
-      return;
-    }
-    if (!nodeMap.has(fromNode) || !nodeMap.has(toNode)) {
-      alert("One or both nodes do not exist.");
-      return;
-    }
-    if (edges.some((edge) => edge.from === fromNode && edge.to === toNode)) {
-      alert("This edge already exists.");
-      return;
-    }
-    setEdges((prev) => [...prev, { from: fromNode, to: toNode }]);
-    setFromNode("");
-    setToNode("");
-  };
 
   // Prevent default context menu
   useEffect(() => {
@@ -107,15 +64,17 @@ function App() {
       const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
 
       animationFrameRef.current = requestAnimationFrame(() => {
-        setNodes((prevNodes) =>
-          prevNodes.map((node) =>
-            node.id === draggedNodeId
-              ? {
-                  ...node,
-                  x: worldPos.x - offset.current.x,
-                  y: worldPos.y - offset.current.y,
-                }
-              : node
+        dispatch(
+          setNodes(
+            nodes.map((node) =>
+              node.id === draggedNodeId
+                ? {
+                    ...node,
+                    x: worldPos.x - offset.current.x,
+                    y: worldPos.y - offset.current.y,
+                  }
+                : node
+            )
           )
         );
       });
@@ -124,7 +83,7 @@ function App() {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      setDraggedNodeId(null);
+      dispatch(setDraggedNodeId(null));
     }
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -135,7 +94,7 @@ function App() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, [draggedNodeId, viewport]);
+  }, [dispatch, draggedNodeId, nodes, viewport]);
 
   // Panning logic - mousedown handler
   useEffect(() => {
@@ -198,34 +157,7 @@ function App() {
 
   return (
     <RootContainer>
-      <UIContainer>
-        <InputGroup>
-          <input
-            type="text"
-            placeholder="New Node ID"
-            value={newNodeId}
-            onChange={(e) => setNewNodeId(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddNode()}
-          />
-          <button onClick={handleAddNode}>Add Node</button>
-        </InputGroup>
-        <InputGroup>
-          <input
-            type="text"
-            placeholder="From Node ID"
-            value={fromNode}
-            onChange={(e) => setFromNode(e.target.value)}
-          />
-          <input
-            type="text"
-            placeholder="To Node ID"
-            value={toNode}
-            onChange={(e) => setToNode(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
-          />
-          <button onClick={handleAddEdge}>Add Edge</button>
-        </InputGroup>
-      </UIContainer>
+      <ControlPanel />
 
       {draggedNode && (
         <PositionDisplay>
@@ -273,7 +205,7 @@ function App() {
             isDragging={draggedNodeId === node.id}
             onMouseDown={(e) => {
               if (e.button !== 0) return;
-              setDraggedNodeId(node.id);
+              dispatch(setDraggedNodeId(node.id));
               const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
               offset.current = {
                 x: worldPos.x - node.x,
