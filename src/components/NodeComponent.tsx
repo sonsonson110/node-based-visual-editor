@@ -5,12 +5,14 @@ import type { Node } from "../types";
 interface NodeComponentProps {
   node: Node;
   isDragging: boolean;
+  isSelected: boolean;
   onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const NodeComponent: React.FC<NodeComponentProps> = ({
   node,
   isDragging,
+  isSelected,
   onMouseDown,
 }) => {
   return (
@@ -22,6 +24,8 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
         width: NODE_WIDTH,
         height: NODE_HEIGHT,
         border: isDragging ? "2px solid red" : "1px solid #000",
+        outline: isSelected ? "2px dashed blue" : "none",
+        outlineOffset: 2,
         background: "#fff",
         display: "flex",
         alignItems: "center",
