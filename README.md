@@ -34,7 +34,6 @@
 - Marker arrowhead implementation
 - Use an requestAnimationFrame throttle to cap updates to the display refresh rate
 
-
 ## Phase 3: Viewport System (Panning & Zooming)
 
 - Introduced the concept of a **camera/viewport** separate from world space.
@@ -44,3 +43,8 @@
 - Nodes and edges remain visually consistent and correctly positioned during zoom & pan.
 - Disabled the browser native right-click menu to allow context-based interactions later.
 - Middle/left-click now pans smoothly across the world while left-click continues to drag nodes.
+
+## Phase 5: Selection System (Multi-Select & Selection Box)
+
+- Added multi-selection capabilities to allow manipulating groups of nodes, addressing a major limitation of earlier phases.
+- Implemented a selection box (marquee selection) to support selecting many nodes efficiently, especially in larger graphs.
