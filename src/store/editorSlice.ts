@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
-import type { Edge, Node, Viewport } from "../types";
+import type { Edge, Node, SelectionBox, Viewport } from "../types";
 
 interface EditorState {
   nodes: Node[];
@@ -9,6 +9,7 @@ interface EditorState {
   selectedNodeIds: Array<string>;
   viewport: Viewport;
   isPanning: boolean;
+  selectionBox: SelectionBox | null;
 }
 
 const SCREEN_WIDTH = window.innerWidth;
@@ -46,6 +47,7 @@ const initialState: EditorState = {
   selectedNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   isPanning: false,
+  selectionBox: null,
 };
 
 export const editorSlice = createSlice({
@@ -73,6 +75,9 @@ export const editorSlice = createSlice({
     setIsPanning: (state, action: PayloadAction<boolean>) => {
       state.isPanning = action.payload;
     },
+    setSelectionBox: (state, action: PayloadAction<SelectionBox | null>) => {
+      state.selectionBox = action.payload;
+    },
   },
 });
 
@@ -84,6 +89,7 @@ export const {
   setSelectedNodeIds,
   setViewport,
   setIsPanning,
+  setSelectionBox,
 } = editorSlice.actions;
 
 // Selectors
@@ -95,5 +101,7 @@ export const selectSelectedNodeIds = (state: RootState) =>
   state.editor.selectedNodeIds;
 export const selectViewport = (state: RootState) => state.editor.viewport;
 export const selectIsPanning = (state: RootState) => state.editor.isPanning;
+export const selectSelectionBox = (state: RootState) =>
+  state.editor.selectionBox;
 
 export default editorSlice.reducer;

@@ -2,8 +2,7 @@ import { useMemo, useRef } from "react";
 import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
-import { useAppSelector } from "./hooks";
-import { useMapInteraction } from "./hooks";
+import { useAppSelector, useMapInteraction } from "./hooks";
 import {
   selectDraggedNodeId,
   selectEdges,
@@ -17,6 +16,7 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
+import SelectionBox from "./components/SelectionBox";
 
 function App() {
   const nodes = useAppSelector(selectNodes);
@@ -104,6 +104,7 @@ function App() {
           />
         ))}
       </WorldContainer>
+      <SelectionBox />
     </RootContainer>
   );
 }

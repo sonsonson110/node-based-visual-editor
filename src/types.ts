@@ -14,3 +14,10 @@ export interface Viewport {
   y: number;
   zoom: number;
 }
+
+export interface SelectionBox {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+}

@@ -5,15 +5,18 @@ import {
   selectIsPanning,
   selectNodes,
   selectSelectedNodeIds,
+  selectSelectionBox,
   selectViewport,
   setDraggedNodeId,
   setIsPanning,
   setNodes,
   setSelectedNodeIds,
+  setSelectionBox,
   setViewport,
 } from "../store/editorSlice";
 import type { Node as MapNode } from "../types";
 import { screenToWorld } from "../utils";
+import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 
 export const useMapInteraction = (
   worldContainerRef: RefObject<HTMLDivElement | null>
@@ -24,6 +27,7 @@ export const useMapInteraction = (
   const draggedNodeId = useAppSelector(selectDraggedNodeId);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
   const isPanning = useAppSelector(selectIsPanning);
+  const selectionBox = useAppSelector(selectSelectionBox);
 
   const offset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const animationFrameRef = useRef<number>(null);
@@ -167,6 +171,85 @@ export const useMapInteraction = (
       document.removeEventListener("wheel", handleWheel);
     };
   }, [dispatch, viewport]);
+
+  // Selection box - mousedown & mousemove
+  useEffect(() => {
+    const container = worldContainerRef.current;
+    if (!container) return;
+
+    function handleMouseDown(e: MouseEvent) {
+      if (draggedNodeId || isPanning) return;
+      if (e.button === 0) {
+        const startX = e.pageX;
+        const startY = e.pageY;
+        dispatch(
+          setSelectionBox({ startX, startY, endX: startX, endY: startY })
+        );
+      }
+    }
+
+    function handleMouseMove(e: MouseEvent) {
+      if (!selectionBox) return;
+      dispatch(
+        setSelectionBox({
+          ...selectionBox,
+          endX: e.pageX,
+          endY: e.pageY,
+        })
+      );
+    }
+
+    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [dispatch, draggedNodeId, isPanning, selectionBox, worldContainerRef]);
+
+  // Selection - mouseup
+  useEffect(() => {
+    function handleMouseUp(e: MouseEvent) {
+      if (e.button !== 0 || !selectionBox) return;
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+      animationFrameRef.current = requestAnimationFrame(() => {
+        const world1 = screenToWorld(
+          selectionBox.startX,
+          selectionBox.startY,
+          viewport
+        );
+        const world2 = screenToWorld(
+          selectionBox.endX,
+          selectionBox.endY,
+          viewport
+        );
+
+        const xMin = Math.min(world1.x, world2.x);
+        const xMax = Math.max(world1.x, world2.x);
+        const yMin = Math.min(world1.y, world2.y);
+        const yMax = Math.max(world1.y, world2.y);
+
+        const insideNodeIds = nodes
+          .filter(
+            (node) =>
+              node.x >= xMin &&
+              node.x + NODE_WIDTH <= xMax &&
+              node.y >= yMin &&
+              node.y + NODE_HEIGHT <= yMax
+          )
+          .map((node) => node.id);
+
+        dispatch(setSelectedNodeIds(Array.from(new Set(insideNodeIds))));
+        dispatch(setSelectionBox(null));
+      });
+    }
+    document.addEventListener("mouseup", handleMouseUp);
+    return () => {
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [dispatch, nodes, selectionBox, viewport]);
 
   // Node interaction handlers
   const handleNodeMouseDown = (pageX: number, pageY: number, node: MapNode) => {

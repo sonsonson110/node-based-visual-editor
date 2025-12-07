@@ -51,7 +51,6 @@ export const WorldContainer = styled.div`
   width: 100%;
   height: 100%;
   transform-origin: 0 0;
-  pointer-events: none;
 `;
 
 export const SVGContainer = styled.svg`
