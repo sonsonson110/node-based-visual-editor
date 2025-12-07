@@ -34,6 +34,9 @@ export const useMapInteraction = ({
   const dragAnchor = useRef<{
     offsets: Record<string, { dx: number; dy: number }>;
   } | null>(null);
+  // Ref to track if a drag has occurred
+  const hasDragged = useRef(false);
+  const potentialDeselection = useRef<string | null>(null);
 
   const dragRaf = useRef<number | null>(null);
   const panRaf = useRef<number | null>(null);
@@ -80,9 +83,9 @@ export const useMapInteraction = ({
         cancelAnimationFrame(dragRaf.current);
       }
 
-      const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
-
       dragRaf.current = requestAnimationFrame(() => {
+        const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
+        hasDragged.current = true;
         dispatch(
           setNodes(
             nodes.map((node) => {
@@ -101,8 +104,16 @@ export const useMapInteraction = ({
     }
     function handleMouseUp(e: MouseEvent) {
       if (e.button !== 0) return;
+      if (potentialDeselection.current && !hasDragged.current) {
+        const nextSelected = selectedNodeIds.filter(
+          (id) => id !== potentialDeselection.current
+        );
+        dispatch(setSelectedNodeIds(nextSelected));
+      }
       dragAnchor.current = null;
       setDraggedNodeId(null);
+      potentialDeselection.current = null;
+      hasDragged.current = false;
     }
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
@@ -113,7 +124,14 @@ export const useMapInteraction = ({
         cancelAnimationFrame(dragRaf.current);
       }
     };
-  }, [dispatch, draggedNodeId, nodes, viewport, worldContainerRef]);
+  }, [
+    dispatch,
+    draggedNodeId,
+    nodes,
+    selectedNodeIds,
+    viewport,
+    worldContainerRef,
+  ]);
 
   // Panning logic - mousedown handler
   useEffect(() => {
@@ -212,8 +230,6 @@ export const useMapInteraction = ({
 
       function handleMouseUp(ev: MouseEvent) {
         if (ev.button !== 0) return;
-        console.log("Mouse up - finalize selection");
-
         document.removeEventListener("mousemove", handleMouseMove);
         document.removeEventListener("mouseup", handleMouseUp);
         if (rafId) cancelAnimationFrame(rafId);
@@ -251,7 +267,6 @@ export const useMapInteraction = ({
   }, [dispatch, draggedNodeId, isPanning, nodes, viewport]);
 
   // Node interaction handlers
-  // TODO: solve problem when shift-click deselect nodeId from the group, but...
   const handleNodeMouseDown = (
     pageX: number,
     pageY: number,
@@ -259,6 +274,9 @@ export const useMapInteraction = ({
     withShiftKey: boolean
   ) => {
     setDraggedNodeId(nodeId);
+    hasDragged.current = false;
+    potentialDeselection.current = null;
+
     const worldPos = screenToWorld(pageX, pageY, viewport);
     const nextSelected = new Set(selectedNodeIdSet);
     let entries;
@@ -273,6 +291,9 @@ export const useMapInteraction = ({
     };
 
     if (selectedNodeIdSet.has(nodeId)) {
+      if (withShiftKey) {
+        potentialDeselection.current = nodeId;
+      }
       // Drag entries
       entries = nodeListToOffsetEntries(selectedNodeIds);
     } else {
@@ -288,7 +309,6 @@ export const useMapInteraction = ({
       // Drag entries
       entries = nodeListToOffsetEntries(nextSelectedArray);
     }
-
     // Drag logic
     dragAnchor.current = {
       offsets: Object.fromEntries(entries),
