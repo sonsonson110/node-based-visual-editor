@@ -1,8 +1,6 @@
-import { useAppSelector } from "../hooks";
-import { selectSelectionBox } from "../store/editorSlice";
+import type { SelectionBoxMeta } from "../types";
 
-function SelectionBox() {
-  const selectionBox = useAppSelector(selectSelectionBox);
+function SelectionBox({selectionBox}: {selectionBox: SelectionBoxMeta | null}) {
 
   if (!selectionBox) return null;
 

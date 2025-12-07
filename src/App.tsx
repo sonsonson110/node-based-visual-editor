@@ -1,4 +1,4 @@
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, useState } from "react";
 import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
@@ -16,6 +16,7 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
+import { type SelectionBoxMeta } from "./types";
 import SelectionBox from "./components/SelectionBox";
 
 function App() {
@@ -25,10 +26,18 @@ function App() {
   const draggedNodeId = useAppSelector(selectDraggedNodeId);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
 
+  // UI gesture state
+  const [selectionBox, setSelectionBox] = useState<SelectionBoxMeta | null>(
+    null
+  );
+
   const worldContainerRef = useRef<HTMLDivElement>(null);
 
-  const { handleNodeMouseDown, handleNodeSelect } =
-    useMapInteraction(worldContainerRef);
+  const { handleNodeMouseDown, handleNodeSelect } = useMapInteraction({
+    worldContainerRef,
+    selectionBox,
+    setSelectionBox,
+  });
 
   const selectedNodeIdSet = useMemo(
     () => new Set(selectedNodeIds),
@@ -104,7 +113,7 @@ function App() {
           />
         ))}
       </WorldContainer>
-      <SelectionBox />
+      <SelectionBox selectionBox={selectionBox} />
     </RootContainer>
   );
 }

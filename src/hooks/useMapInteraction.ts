@@ -1,33 +1,37 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useAppDispatch, useAppSelector } from ".";
+import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 import {
   selectDraggedNodeId,
-  selectIsPanning,
   selectNodes,
   selectSelectedNodeIds,
-  selectSelectionBox,
   selectViewport,
   setDraggedNodeId,
-  setIsPanning,
   setNodes,
   setSelectedNodeIds,
-  setSelectionBox,
   setViewport,
 } from "../store/editorSlice";
-import type { Node as MapNode } from "../types";
+import type { Node as MapNode, SelectionBoxMeta } from "../types";
 import { screenToWorld } from "../utils";
-import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 
-export const useMapInteraction = (
-  worldContainerRef: RefObject<HTMLDivElement | null>
-) => {
+interface MapInteractionOptions {
+  worldContainerRef: RefObject<HTMLDivElement | null>;
+  selectionBox?: SelectionBoxMeta | null;
+  setSelectionBox?: (box: SelectionBoxMeta | null) => void;
+}
+
+export const useMapInteraction = ({
+  worldContainerRef,
+  selectionBox,
+  setSelectionBox,
+}: MapInteractionOptions) => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const viewport = useAppSelector(selectViewport);
   const draggedNodeId = useAppSelector(selectDraggedNodeId);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
-  const isPanning = useAppSelector(selectIsPanning);
-  const selectionBox = useAppSelector(selectSelectionBox);
+
+  const [isPanning, setIsPanning] = useState(false);
 
   const offset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const animationFrameRef = useRef<number>(null);
@@ -109,7 +113,7 @@ export const useMapInteraction = (
     function handleMouseDown(e: MouseEvent) {
       if (draggedNodeId) return;
       if (e.button === 1 || e.button === 2) {
-        dispatch(setIsPanning(true));
+        setIsPanning(true);
         panStart.current = { x: e.pageX - viewport.x, y: e.pageY - viewport.y };
       }
     }
@@ -138,7 +142,7 @@ export const useMapInteraction = (
     }
     function handleMouseUp(e: MouseEvent) {
       if (e.button === 1 || e.button === 2) {
-        dispatch(setIsPanning(false));
+        setIsPanning(false);
       }
     }
     document.addEventListener("mousemove", handleMouseMove);
@@ -182,21 +186,17 @@ export const useMapInteraction = (
       if (e.button === 0) {
         const startX = e.pageX;
         const startY = e.pageY;
-        dispatch(
-          setSelectionBox({ startX, startY, endX: startX, endY: startY })
-        );
+        setSelectionBox?.({ startX, startY, endX: startX, endY: startY });
       }
     }
 
     function handleMouseMove(e: MouseEvent) {
       if (!selectionBox) return;
-      dispatch(
-        setSelectionBox({
-          ...selectionBox,
-          endX: e.pageX,
-          endY: e.pageY,
-        })
-      );
+      setSelectionBox?.({
+        ...selectionBox,
+        endX: e.pageX,
+        endY: e.pageY,
+      });
     }
 
     document.addEventListener("mousedown", handleMouseDown);
@@ -205,7 +205,14 @@ export const useMapInteraction = (
       document.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("mousemove", handleMouseMove);
     };
-  }, [dispatch, draggedNodeId, isPanning, selectionBox, worldContainerRef]);
+  }, [
+    dispatch,
+    draggedNodeId,
+    isPanning,
+    selectionBox,
+    setSelectionBox,
+    worldContainerRef,
+  ]);
 
   // Selection - mouseup
   useEffect(() => {
@@ -242,14 +249,14 @@ export const useMapInteraction = (
           .map((node) => node.id);
 
         dispatch(setSelectedNodeIds(Array.from(new Set(insideNodeIds))));
-        dispatch(setSelectionBox(null));
+        setSelectionBox?.(null);
       });
     }
     document.addEventListener("mouseup", handleMouseUp);
     return () => {
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dispatch, nodes, selectionBox, viewport]);
+  }, [dispatch, nodes, selectionBox, setSelectionBox, viewport]);
 
   // Node interaction handlers
   const handleNodeMouseDown = (pageX: number, pageY: number, node: MapNode) => {

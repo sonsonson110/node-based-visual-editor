@@ -15,7 +15,7 @@ export interface Viewport {
   zoom: number;
 }
 
-export interface SelectionBox {
+export interface SelectionBoxMeta {
   startX: number;
   startY: number;
   endX: number;
