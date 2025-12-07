@@ -66,7 +66,7 @@ const ControlPanel: React.FC = () => {
   };
 
   return (
-    <UIContainer>
+    <UIContainer onMouseDown={(e) => e.stopPropagation()}>
       <InputGroup>
         <input
           type="text"
