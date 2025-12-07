@@ -48,3 +48,16 @@
 
 - Added multi-selection capabilities to allow manipulating groups of nodes, addressing a major limitation of earlier phases.
 - Implemented a selection box (marquee selection) to support selecting many nodes efficiently, especially in larger graphs.
+
+## Phase 6: Group Movement (Multi-Node Drag)
+
+Goal:
+
+When multiple nodes are selected, dragging any one of them should move the entire group smoothly — exactly like n8n, Figma, Node-RED, Godot, and Unreal Blueprint.
+
+This requires several architectural updates:
+
+- A new concept called group drag origin
+- Drag offsets stored per-node (or shared offset reference)
+- Consistent world-space dragging under zoom/pan
+- Hit-testing logic that doesn’t confuse “dragging group” vs. “drawing selection box”
