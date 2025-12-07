@@ -1,10 +1,10 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useRef } from "react";
 import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
 import NodeComponent from "./components/NodeComponent";
+import SelectionBox from "./components/SelectionBox";
 import { useAppSelector, useMapInteraction } from "./hooks";
 import {
-  selectDraggedNodeId,
   selectEdges,
   selectNodes,
   selectSelectedNodeIds,
@@ -16,28 +16,19 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
-import { type SelectionBoxMeta } from "./types";
-import SelectionBox from "./components/SelectionBox";
 
 function App() {
   const nodes = useAppSelector(selectNodes);
   const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
-  const draggedNodeId = useAppSelector(selectDraggedNodeId);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
-
-  // UI gesture state
-  const [selectionBox, setSelectionBox] = useState<SelectionBoxMeta | null>(
-    null
-  );
 
   const worldContainerRef = useRef<HTMLDivElement>(null);
 
-  const { handleNodeMouseDown, handleNodeSelect } = useMapInteraction({
-    worldContainerRef,
-    selectionBox,
-    setSelectionBox,
-  });
+  const { selectionBox, isPanning, draggedNodeId, handleNodeMouseDown } =
+    useMapInteraction({
+      worldContainerRef,
+    });
 
   const selectedNodeIdSet = useMemo(
     () => new Set(selectedNodeIds),
@@ -55,7 +46,7 @@ function App() {
   }, [draggedNodeId, nodeMap]);
 
   return (
-    <RootContainer>
+    <RootContainer style={{ cursor: isPanning ? "move" : "default" }}>
       <ControlPanel />
 
       {draggedNode && (
@@ -107,8 +98,7 @@ function App() {
             onMouseDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();
-              handleNodeMouseDown(e.pageX, e.pageY, node);
-              handleNodeSelect(node.id, e.shiftKey);
+              handleNodeMouseDown(e.pageX, e.pageY, node.id, e.shiftKey);
             }}
           />
         ))}

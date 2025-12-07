@@ -2,18 +2,17 @@ import React from "react";
 import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 import type { Node } from "../types";
 
-interface NodeComponentProps {
+interface NodeComponentProps extends React.HTMLAttributes<HTMLDivElement> {
   node: Node;
   isDragging: boolean;
   isSelected: boolean;
-  onMouseDown: (e: React.MouseEvent<HTMLDivElement>) => void;
 }
 
 const NodeComponent: React.FC<NodeComponentProps> = ({
   node,
   isDragging,
   isSelected,
-  onMouseDown,
+  ...rest
 }) => {
   return (
     <div
@@ -30,11 +29,11 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: isDragging ? "grabbing" : "pointer",
         userSelect: "none",
         pointerEvents: "auto",
       }}
-      onMouseDown={onMouseDown}
+      {...rest}
     >
       {node.id}
     </div>

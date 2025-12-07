@@ -5,7 +5,6 @@ import type { Edge, Node, Viewport } from "../types";
 interface EditorState {
   nodes: Node[];
   edges: Edge[];
-  draggedNodeId: string | null;
   selectedNodeIds: Array<string>;
   viewport: Viewport;
 }
@@ -41,7 +40,6 @@ const initialState: EditorState = {
     { from: "3", to: "5" },
     { from: "4", to: "6" },
   ],
-  draggedNodeId: null,
   selectedNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
 };
@@ -59,9 +57,6 @@ export const editorSlice = createSlice({
     addEdge: (state, action: PayloadAction<Edge>) => {
       state.edges.push(action.payload);
     },
-    setDraggedNodeId: (state, action: PayloadAction<string | null>) => {
-      state.draggedNodeId = action.payload;
-    },
     setSelectedNodeIds: (state, action: PayloadAction<Array<string>>) => {
       state.selectedNodeIds = action.payload;
     },
@@ -71,20 +66,12 @@ export const editorSlice = createSlice({
   },
 });
 
-export const {
-  setNodes,
-  addNode,
-  addEdge,
-  setDraggedNodeId,
-  setSelectedNodeIds,
-  setViewport,
-} = editorSlice.actions;
+export const { setNodes, addNode, addEdge, setSelectedNodeIds, setViewport } =
+  editorSlice.actions;
 
 // Selectors
 export const selectNodes = (state: RootState) => state.editor.nodes;
 export const selectEdges = (state: RootState) => state.editor.edges;
-export const selectDraggedNodeId = (state: RootState) =>
-  state.editor.draggedNodeId;
 export const selectSelectedNodeIds = (state: RootState) =>
   state.editor.selectedNodeIds;
 export const selectViewport = (state: RootState) => state.editor.viewport;

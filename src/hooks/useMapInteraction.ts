@@ -1,41 +1,52 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useAppDispatch, useAppSelector } from ".";
 import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 import {
-  selectDraggedNodeId,
   selectNodes,
   selectSelectedNodeIds,
   selectViewport,
-  setDraggedNodeId,
   setNodes,
   setSelectedNodeIds,
   setViewport,
 } from "../store/editorSlice";
-import type { Node as MapNode, SelectionBoxMeta } from "../types";
+import type { SelectionBoxMeta } from "../types";
 import { screenToWorld } from "../utils";
 
 interface MapInteractionOptions {
   worldContainerRef: RefObject<HTMLDivElement | null>;
-  selectionBox?: SelectionBoxMeta | null;
-  setSelectionBox?: (box: SelectionBoxMeta | null) => void;
 }
 
 export const useMapInteraction = ({
   worldContainerRef,
-  selectionBox,
-  setSelectionBox,
 }: MapInteractionOptions) => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const viewport = useAppSelector(selectViewport);
-  const draggedNodeId = useAppSelector(selectDraggedNodeId);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
 
   const [isPanning, setIsPanning] = useState(false);
+  const [draggedNodeId, setDraggedNodeId] = useState<string | null>(null);
+  const [selectionBox, setSelectionBox] = useState<SelectionBoxMeta | null>(
+    null
+  );
 
-  const offset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
-  const animationFrameRef = useRef<number>(null);
   const panStart = useRef({ x: 0, y: 0 });
+  const dragAnchor = useRef<{
+    offsets: Record<string, { dx: number; dy: number }>;
+  } | null>(null);
+
+  const dragRaf = useRef<number | null>(null);
+  const panRaf = useRef<number | null>(null);
+
+  const nodeMap = useMemo(
+    () => new Map(nodes.map((node) => [node.id, node])),
+    [nodes]
+  );
+
+  const selectedNodeIdSet = useMemo(
+    () => new Set(selectedNodeIds),
+    [selectedNodeIds]
+  );
 
   // Prevent default context menu
   useEffect(() => {
@@ -65,42 +76,41 @@ export const useMapInteraction = ({
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (!draggedNodeId || !worldContainerRef.current) return;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (dragRaf.current) {
+        cancelAnimationFrame(dragRaf.current);
       }
 
       const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
 
-      animationFrameRef.current = requestAnimationFrame(() => {
+      dragRaf.current = requestAnimationFrame(() => {
         dispatch(
           setNodes(
-            nodes.map((node) =>
-              node.id === draggedNodeId
-                ? {
-                    ...node,
-                    x: worldPos.x - offset.current.x,
-                    y: worldPos.y - offset.current.y,
-                  }
-                : node
-            )
+            nodes.map((node) => {
+              if (!dragAnchor.current) return node;
+              const offset = dragAnchor.current.offsets[node.id];
+              if (!offset) return node;
+              return {
+                ...node,
+                x: worldPos.x - offset.dx,
+                y: worldPos.y - offset.dy,
+              };
+            })
           )
         );
       });
     }
     function handleMouseUp(e: MouseEvent) {
       if (e.button !== 0) return;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      dispatch(setDraggedNodeId(null));
+      dragAnchor.current = null;
+      setDraggedNodeId(null);
     }
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (dragRaf.current) {
+        cancelAnimationFrame(dragRaf.current);
       }
     };
   }, [dispatch, draggedNodeId, nodes, viewport, worldContainerRef]);
@@ -127,10 +137,10 @@ export const useMapInteraction = ({
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
       if (!isPanning) return;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
+      if (panRaf.current) {
+        cancelAnimationFrame(panRaf.current);
       }
-      animationFrameRef.current = requestAnimationFrame(() => {
+      panRaf.current = requestAnimationFrame(() => {
         dispatch(
           setViewport({
             ...viewport,
@@ -150,6 +160,9 @@ export const useMapInteraction = ({
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      if (panRaf.current) {
+        cancelAnimationFrame(panRaf.current);
+      }
     };
   }, [dispatch, isPanning, viewport]);
 
@@ -176,62 +189,37 @@ export const useMapInteraction = ({
     };
   }, [dispatch, viewport]);
 
-  // Selection box - mousedown & mousemove
+  // Selection box mouse logic
   useEffect(() => {
-    const container = worldContainerRef.current;
-    if (!container) return;
-
     function handleMouseDown(e: MouseEvent) {
-      if (draggedNodeId || isPanning) return;
-      if (e.button === 0) {
-        const startX = e.pageX;
-        const startY = e.pageY;
-        setSelectionBox?.({ startX, startY, endX: startX, endY: startY });
+      if (draggedNodeId || isPanning || e.button !== 0) return;
+
+      const startX = e.pageX;
+      const startY = e.pageY;
+
+      setSelectionBox({ startX, startY, endX: startX, endY: startY });
+
+      let rafId: number | null = null;
+      function handleMouseMove(ev: MouseEvent) {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          setSelectionBox((prev) => {
+            if (!prev) return null;
+            return { ...prev, endX: ev.pageX, endY: ev.pageY };
+          });
+        });
       }
-    }
 
-    function handleMouseMove(e: MouseEvent) {
-      if (!selectionBox) return;
-      setSelectionBox?.({
-        ...selectionBox,
-        endX: e.pageX,
-        endY: e.pageY,
-      });
-    }
+      function handleMouseUp(ev: MouseEvent) {
+        if (ev.button !== 0) return;
+        console.log("Mouse up - finalize selection");
 
-    document.addEventListener("mousedown", handleMouseDown);
-    document.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-      document.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, [
-    dispatch,
-    draggedNodeId,
-    isPanning,
-    selectionBox,
-    setSelectionBox,
-    worldContainerRef,
-  ]);
+        document.removeEventListener("mousemove", handleMouseMove);
+        document.removeEventListener("mouseup", handleMouseUp);
+        if (rafId) cancelAnimationFrame(rafId);
 
-  // Selection - mouseup
-  useEffect(() => {
-    function handleMouseUp(e: MouseEvent) {
-      if (e.button !== 0 || !selectionBox) return;
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      animationFrameRef.current = requestAnimationFrame(() => {
-        const world1 = screenToWorld(
-          selectionBox.startX,
-          selectionBox.startY,
-          viewport
-        );
-        const world2 = screenToWorld(
-          selectionBox.endX,
-          selectionBox.endY,
-          viewport
-        );
+        const world1 = screenToWorld(startX, startY, viewport);
+        const world2 = screenToWorld(ev.pageX, ev.pageY, viewport);
 
         const xMin = Math.min(world1.x, world2.x);
         const xMax = Math.max(world1.x, world2.x);
@@ -249,42 +237,68 @@ export const useMapInteraction = ({
           .map((node) => node.id);
 
         dispatch(setSelectedNodeIds(Array.from(new Set(insideNodeIds))));
-        setSelectionBox?.(null);
-      });
+        setSelectionBox(null);
+      }
+
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
     }
-    document.addEventListener("mouseup", handleMouseUp);
+
+    document.addEventListener("mousedown", handleMouseDown);
     return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [dispatch, nodes, selectionBox, setSelectionBox, viewport]);
+  }, [dispatch, draggedNodeId, isPanning, nodes, viewport]);
 
   // Node interaction handlers
-  const handleNodeMouseDown = (pageX: number, pageY: number, node: MapNode) => {
-    dispatch(setDraggedNodeId(node.id));
+  // TODO: solve problem when shift-click deselect nodeId from the group, but...
+  const handleNodeMouseDown = (
+    pageX: number,
+    pageY: number,
+    nodeId: string,
+    withShiftKey: boolean
+  ) => {
+    setDraggedNodeId(nodeId);
     const worldPos = screenToWorld(pageX, pageY, viewport);
-    offset.current = {
-      x: worldPos.x - node.x,
-      y: worldPos.y - node.y,
+    const nextSelected = new Set(selectedNodeIdSet);
+    let entries;
+    const nodeListToOffsetEntries = (nodeIds: string[]) => {
+      return nodeIds
+        .map((id) => {
+          const n = nodeMap.get(id);
+          if (!n) return null;
+          return [id, { dx: worldPos.x - n.x, dy: worldPos.y - n.y }];
+        })
+        .filter((entry) => entry !== null);
+    };
+
+    if (selectedNodeIdSet.has(nodeId)) {
+      // Drag entries
+      entries = nodeListToOffsetEntries(selectedNodeIds);
+    } else {
+      // Selection logic
+      if (withShiftKey) {
+        nextSelected.add(nodeId);
+      } else {
+        nextSelected.clear();
+        nextSelected.add(nodeId);
+      }
+      const nextSelectedArray = Array.from(nextSelected);
+      dispatch(setSelectedNodeIds(nextSelectedArray));
+      // Drag entries
+      entries = nodeListToOffsetEntries(nextSelectedArray);
+    }
+
+    // Drag logic
+    dragAnchor.current = {
+      offsets: Object.fromEntries(entries),
     };
   };
 
-  const handleNodeSelect = (nodeId: string, multi: boolean) => {
-    const nextSelected = new Set(selectedNodeIds);
-    if (multi) {
-      if (nextSelected.has(nodeId)) {
-        nextSelected.delete(nodeId);
-      } else {
-        nextSelected.add(nodeId);
-      }
-      dispatch(setSelectedNodeIds(Array.from(nextSelected)));
-    } else {
-      dispatch(setSelectedNodeIds([nodeId]));
-    }
+  return {
+    selectionBox,
+    isPanning,
+    draggedNodeId,
+    handleNodeMouseDown,
   };
-
-  const handleDeselectAllNodes = () => {
-    dispatch(setSelectedNodeIds([]));
-  };
-
-  return { handleNodeMouseDown, handleNodeSelect, handleDeselectAllNodes };
 };
