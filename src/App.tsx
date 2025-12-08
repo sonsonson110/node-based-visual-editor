@@ -16,6 +16,7 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
+import { GRID_SIZE } from "./constants";
 
 function App() {
   const nodes = useAppSelector(selectNodes);
@@ -59,6 +60,10 @@ function App() {
         ref={worldContainerRef}
         style={{
           transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+          backgroundSize: `${GRID_SIZE * viewport.zoom}px ${
+            GRID_SIZE * viewport.zoom
+          }px`,
+          backgroundPosition: `${viewport.x}px ${viewport.y}px`,
         }}
       >
         <SVGContainer>

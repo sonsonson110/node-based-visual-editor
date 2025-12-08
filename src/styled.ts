@@ -47,6 +47,8 @@ export const WorldContainer = styled.div`
   width: 100%;
   height: 100%;
   transform-origin: 0 0;
+  background-image: linear-gradient(#ccc 1px, transparent 1px),
+    linear-gradient(90deg, #ccc 1px, transparent 1px);
 `;
 
 export const SVGContainer = styled.svg`

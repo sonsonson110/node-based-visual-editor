@@ -63,3 +63,10 @@ This requires several architectural updates:
 - Drag offsets stored per-node (or shared offset reference)
 - Consistent world-space dragging under zoom/pan
 - Hit-testing logic that doesn’t confuse “dragging group” vs. “drawing selection box”
+
+## Phase 7: Grid & Snap-to-Grid
+
+- Introduced a grid system to the canvas for better alignment and organization of nodes. 
+- Grid lines are rendered in the background of the canvas, scales with zoom level, pans with world movement.
+- Implemented snap-to-grid functionality, allowing nodes to snap to the nearest grid intersection when moved.
+- Overrides for snap-to-grid behavior when holding modifier keys (Alt).
