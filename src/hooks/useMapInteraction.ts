@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useAppDispatch, useAppSelector } from ".";
-import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
+import { NODE_HEIGHT, NODE_WIDTH, SNAP_THRESHOLD } from "../constants";
 import {
   selectNodes,
   selectSelectedNodeIds,
@@ -94,12 +94,23 @@ export const useMapInteraction = ({
               if (!dragAnchor.current) return node;
               const offset = dragAnchor.current.offsets[node.id];
               if (!offset) return node;
-              const nextX = worldPos.x - offset.dx;
-              const nextY = worldPos.y - offset.dy;
+              let nextX = worldPos.x - offset.dx;
+              let nextY = worldPos.y - offset.dy;
+              // Snapping logic
+              if (snapEnabled) {
+                const snappedX = snapToGrid(nextX);
+                if (Math.abs(snappedX - nextX) < SNAP_THRESHOLD) {
+                  nextX = snappedX;
+                }
+                const snappedY = snapToGrid(nextY);
+                if (Math.abs(snappedY - nextY) < SNAP_THRESHOLD) {
+                  nextY = snappedY;
+                }
+              }
               return {
                 ...node,
-                x: snapEnabled ? snapToGrid(nextX) : nextX,
-                y: snapEnabled ? snapToGrid(nextY) : nextY,
+                x: nextX,
+                y: nextY,
               };
             })
           )
