@@ -47,7 +47,15 @@ function App() {
   }, [draggedNodeId, nodeMap]);
 
   return (
-    <RootContainer style={{ cursor: isPanning ? "move" : "default" }}>
+    <RootContainer
+      style={{
+        cursor: isPanning ? "move" : "default",
+        backgroundSize: `${GRID_SIZE * viewport.zoom}px ${
+          GRID_SIZE * viewport.zoom
+        }px`,
+        backgroundPosition: `${viewport.x}px ${viewport.y}px`,
+      }}
+    >
       <ControlPanel />
 
       {draggedNode && (
@@ -60,10 +68,6 @@ function App() {
         ref={worldContainerRef}
         style={{
           transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
-          backgroundSize: `${GRID_SIZE * viewport.zoom}px ${
-            GRID_SIZE * viewport.zoom
-          }px`,
-          backgroundPosition: `${viewport.x}px ${viewport.y}px`,
         }}
       >
         <SVGContainer>

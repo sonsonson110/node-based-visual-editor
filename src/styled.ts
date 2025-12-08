@@ -6,6 +6,8 @@ export const RootContainer = styled.div`
   background-color: #f0f0f0;
   position: relative;
   overflow: hidden;
+  background-image: linear-gradient(#ccc 1px, transparent 1px),
+    linear-gradient(90deg, #ccc 1px, transparent 1px);
 `;
 
 export const UIContainer = styled.div`
@@ -47,8 +49,6 @@ export const WorldContainer = styled.div`
   width: 100%;
   height: 100%;
   transform-origin: 0 0;
-  background-image: linear-gradient(#ccc 1px, transparent 1px),
-    linear-gradient(90deg, #ccc 1px, transparent 1px);
 `;
 
 export const SVGContainer = styled.svg`
