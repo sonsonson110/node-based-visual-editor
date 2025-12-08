@@ -84,18 +84,22 @@ export const useMapInteraction = ({
       }
 
       dragRaf.current = requestAnimationFrame(() => {
-        const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
         hasDragged.current = true;
+        const snapEnabled = !e.altKey;
+
+        const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
         dispatch(
           setNodes(
             nodes.map((node) => {
               if (!dragAnchor.current) return node;
               const offset = dragAnchor.current.offsets[node.id];
               if (!offset) return node;
+              const nextX = worldPos.x - offset.dx;
+              const nextY = worldPos.y - offset.dy;
               return {
                 ...node,
-                x: snapToGrid(worldPos.x - offset.dx),
-                y: snapToGrid(worldPos.y - offset.dy),
+                x: snapEnabled ? snapToGrid(nextX) : nextX,
+                y: snapEnabled ? snapToGrid(nextY) : nextY,
               };
             })
           )
