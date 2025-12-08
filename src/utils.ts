@@ -1,4 +1,9 @@
-import { NODE_HALF_HEIGHT, NODE_HALF_WIDTH, NODE_WIDTH } from "./constants";
+import {
+  GRID_SIZE,
+  NODE_HALF_HEIGHT,
+  NODE_HALF_WIDTH,
+  NODE_WIDTH,
+} from "./constants";
 import type { Node, Viewport } from "./types";
 
 export function getNodeCenter(node: Node) {
@@ -42,4 +47,8 @@ export function worldToScreen(
     x: worldX * viewport.zoom + viewport.x,
     y: worldY * viewport.zoom + viewport.y,
   };
+}
+
+export function snapToGrid(value: number) {
+  return Math.round(value / GRID_SIZE) * GRID_SIZE;
 }

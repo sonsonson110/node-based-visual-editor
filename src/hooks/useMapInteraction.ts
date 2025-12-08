@@ -10,7 +10,7 @@ import {
   setViewport,
 } from "../store/editorSlice";
 import type { SelectionBoxMeta } from "../types";
-import { screenToWorld } from "../utils";
+import { screenToWorld, snapToGrid } from "../utils";
 
 interface MapInteractionOptions {
   worldContainerRef: RefObject<HTMLDivElement | null>;
@@ -94,8 +94,8 @@ export const useMapInteraction = ({
               if (!offset) return node;
               return {
                 ...node,
-                x: worldPos.x - offset.dx,
-                y: worldPos.y - offset.dy,
+                x: snapToGrid(worldPos.x - offset.dx),
+                y: snapToGrid(worldPos.y - offset.dy),
               };
             })
           )
