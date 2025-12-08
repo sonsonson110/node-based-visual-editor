@@ -6,7 +6,9 @@ export const RootContainer = styled.div`
   background-color: #f0f0f0;
   position: relative;
   overflow: hidden;
-  background-image: linear-gradient(#ccc 1px, transparent 1px),
+  background-image: linear-gradient(#999 1px, transparent 1px),
+    linear-gradient(90deg, #999 1px, transparent 1px),
+    linear-gradient(#ccc 1px, transparent 1px),
     linear-gradient(90deg, #ccc 1px, transparent 1px);
 `;
 

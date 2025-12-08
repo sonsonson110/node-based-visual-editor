@@ -46,13 +46,14 @@ function App() {
     return nodeMap.get(draggedNodeId);
   }, [draggedNodeId, nodeMap]);
 
+  const bgSize = GRID_SIZE * viewport.zoom;
+  const majorBgSize = bgSize * 4;
+
   return (
     <RootContainer
       style={{
         cursor: isPanning ? "move" : "default",
-        backgroundSize: `${GRID_SIZE * viewport.zoom}px ${
-          GRID_SIZE * viewport.zoom
-        }px`,
+        backgroundSize: `${majorBgSize}px ${majorBgSize}px, ${majorBgSize}px ${majorBgSize}px, ${bgSize}px ${bgSize}px, ${bgSize}px ${bgSize}px`,
         backgroundPosition: `${viewport.x}px ${viewport.y}px`,
       }}
     >
