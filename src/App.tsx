@@ -17,6 +17,7 @@ import {
   WorldContainer,
 } from "./styled";
 import { GRID_SIZE } from "./constants";
+import Minimap from "./components/Minimap";
 
 function App() {
   const nodes = useAppSelector(selectNodes);
@@ -114,6 +115,13 @@ function App() {
         ))}
       </WorldContainer>
       <SelectionBox selectionBox={selectionBox} />
+      <Minimap
+        style={{
+          position: "absolute",
+          bottom: 16,
+          right: 16,
+        }}
+      />
     </RootContainer>
   );
 }

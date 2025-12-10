@@ -21,3 +21,10 @@ export interface SelectionBoxMeta {
   endX: number;
   endY: number;
 }
+
+export interface WorldBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}

@@ -1,29 +1,36 @@
 import {
-  GRID_SIZE,
-  NODE_HALF_HEIGHT,
-  NODE_HALF_WIDTH,
-  NODE_WIDTH,
+  GRID_SIZE
 } from "./constants";
-import type { Node, Viewport } from "./types";
+import type { Viewport } from "./types";
 
-export function getNodeCenter(node: Node) {
+export function getRectCenter(
+  x: number,
+  y: number,
+  width: number,
+  height: number
+) {
   return {
-    cx: node.x + NODE_HALF_WIDTH,
-    cy: node.y + NODE_HALF_HEIGHT,
+    cx: x + width / 2,
+    cy: y + height / 2,
   };
 }
 
-export function getNodeCenterLeft(node: Node) {
+export function getRectCenterLeft(x: number, y: number, height: number) {
   return {
-    cx: node.x,
-    cy: node.y + NODE_HALF_HEIGHT,
+    cx: x,
+    cy: y + height / 2,
   };
 }
 
-export function getNodeCenterRight(node: Node) {
+export function getRectCenterRight(
+  x: number,
+  y: number,
+  width: number,
+  height: number
+) {
   return {
-    cx: node.x + NODE_WIDTH,
-    cy: node.y + NODE_HALF_HEIGHT,
+    cx: x + width,
+    cy: y + height / 2,
   };
 }
 
