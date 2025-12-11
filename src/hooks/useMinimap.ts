@@ -1,6 +1,11 @@
 import { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from ".";
-import { selectEdges, selectNodes, selectViewport } from "../store/editorSlice";
+import {
+  selectEdges,
+  selectNodes,
+  selectSelectedNodeIds,
+  selectViewport,
+} from "../store/editorSlice";
 import {
   MINIMAP_HEIGHT,
   MINIMAP_WIDTH,
@@ -8,6 +13,7 @@ import {
   NODE_WIDTH,
 } from "../constants";
 import type { WorldBounds } from "../types";
+import { screenToWorld } from "../utils";
 
 export function useMinimap() {
   const dispatch = useAppDispatch();
@@ -60,5 +66,18 @@ export function useMinimap() {
     return new Map(minimapNodes.map((node) => [node.id, node]));
   }, [minimapNodes]);
 
-  return { minimapNodes, edges, minimapNodeMap };
+  const viewportIndicator = useMemo(() => {
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const topLeft = screenToWorld(0, 0, viewport);
+    const bottomRight = screenToWorld(screenWidth, screenHeight, viewport);
+    return {
+      x: (topLeft.x - worldBounds.x) * minimapScale,
+      y: (topLeft.y - worldBounds.y) * minimapScale,
+      width: (bottomRight.x - topLeft.x) * minimapScale,
+      height: (bottomRight.y - topLeft.y) * minimapScale,
+    };
+  }, [minimapScale, viewport, worldBounds.x, worldBounds.y]);
+
+  return { minimapNodes, edges, minimapNodeMap, viewportIndicator };
 }
