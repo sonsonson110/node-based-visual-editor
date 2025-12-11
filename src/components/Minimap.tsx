@@ -1,9 +1,9 @@
-import React, { use, useMemo } from "react";
+import React, { useMemo } from "react";
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants";
-import { useMinimap } from "../hooks/useMinimap";
-import { getRectCenter } from "../utils";
-import { selectSelectedNodeIds } from "../store/editorSlice";
 import { useAppSelector } from "../hooks";
+import { useMinimap } from "../hooks/useMinimap";
+import { selectSelectedNodeIds } from "../store/editorSlice";
+import { getRectCenter } from "../utils";
 
 type MinimapProps = React.HTMLProps<HTMLDivElement>;
 

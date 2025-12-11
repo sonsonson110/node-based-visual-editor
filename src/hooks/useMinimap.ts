@@ -1,22 +1,20 @@
 import { useMemo } from "react";
-import { useAppDispatch, useAppSelector } from ".";
+import { useAppSelector } from ".";
 import {
-  selectEdges,
-  selectNodes,
-  selectSelectedNodeIds,
-  selectViewport,
-} from "../store/editorSlice";
-import {
-  MINIMAP_HEIGHT,
-  MINIMAP_WIDTH,
-  NODE_HEIGHT,
-  NODE_WIDTH,
+    MINIMAP_HEIGHT,
+    MINIMAP_WIDTH,
+    NODE_HEIGHT,
+    NODE_WIDTH,
 } from "../constants";
+import {
+    selectEdges,
+    selectNodes,
+    selectViewport
+} from "../store/editorSlice";
 import type { WorldBounds } from "../types";
 import { screenToWorld } from "../utils";
 
 export function useMinimap() {
-  const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
