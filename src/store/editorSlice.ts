@@ -54,6 +54,9 @@ export const editorSlice = createSlice({
     addNode: (state, action: PayloadAction<Node>) => {
       state.nodes.push(action.payload);
     },
+    setEdges: (state, action: PayloadAction<Edge[]>) => {
+      state.edges = action.payload;
+    },
     addEdge: (state, action: PayloadAction<Edge>) => {
       state.edges.push(action.payload);
     },
@@ -66,8 +69,14 @@ export const editorSlice = createSlice({
   },
 });
 
-export const { setNodes, addNode, addEdge, setSelectedNodeIds, setViewport } =
-  editorSlice.actions;
+export const {
+  setNodes,
+  addNode,
+  addEdge,
+  setSelectedNodeIds,
+  setViewport,
+  setEdges,
+} = editorSlice.actions;
 
 // Selectors
 export const selectNodes = (state: RootState) => state.editor.nodes;

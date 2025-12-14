@@ -6,7 +6,10 @@ import {
   addNode,
   selectEdges,
   selectNodes,
+  selectSelectedNodeIds,
   selectViewport,
+  setEdges,
+  setNodes,
 } from "../store/editorSlice";
 import { screenToWorld } from "../utils";
 import type { Node } from "../types";
@@ -16,6 +19,7 @@ const ControlPanel: React.FC = () => {
   const nodes = useSelector(selectNodes);
   const edges = useSelector(selectEdges);
   const viewport = useSelector(selectViewport);
+  const selectedNodeIds = useSelector(selectSelectedNodeIds);
 
   const [newNodeId, setNewNodeId] = useState("");
   const [fromNode, setFromNode] = useState("");
@@ -24,6 +28,11 @@ const ControlPanel: React.FC = () => {
   const nodeMap = useMemo(
     () => new Map(nodes.map((node) => [node.id, node])),
     [nodes]
+  );
+
+  const selectedNodeIdSet = useMemo(
+    () => new Set(selectedNodeIds),
+    [selectedNodeIds]
   );
 
   const handleAddNode = () => {
@@ -65,6 +74,18 @@ const ControlPanel: React.FC = () => {
     setToNode("");
   };
 
+  const handleRemoveSelectedNodes = () => {
+    const remainingNodes = nodes.filter(
+      (node) => !selectedNodeIdSet.has(node.id)
+    );
+    const remainingEdges = edges.filter(
+      (edge) =>
+        !selectedNodeIdSet.has(edge.from) && !selectedNodeIdSet.has(edge.to)
+    );
+    dispatch(setNodes(remainingNodes));
+    dispatch(setEdges(remainingEdges));
+  };
+
   return (
     <UIContainer onMouseDown={(e) => e.stopPropagation()}>
       <InputGroup>
@@ -92,6 +113,15 @@ const ControlPanel: React.FC = () => {
           onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
         />
         <button onClick={handleAddEdge}>Add Edge</button>
+      </InputGroup>
+      <InputGroup>
+        <span>Selected Nodes: {selectedNodeIds.length}</span>
+        <button
+          onClick={handleRemoveSelectedNodes}
+          disabled={selectedNodeIds.length === 0}
+        >
+          Remove Selected Nodes
+        </button>
       </InputGroup>
     </UIContainer>
   );
