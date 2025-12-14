@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants";
-import { useAppSelector } from "../hooks";
-import { useMinimap } from "../hooks/useMinimap";
+import { useAppSelector, useMinimap } from "../hooks";
 import { selectSelectedNodeIds } from "../store/editorSlice";
 import { getRectCenter } from "../utils";
 
@@ -9,8 +8,17 @@ type MinimapProps = React.HTMLProps<HTMLDivElement>;
 
 function Minimap(props: MinimapProps) {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
-  const { minimapNodes, edges, minimapNodeMap, viewportIndicator } =
-    useMinimap();
+  const {
+    minimapNodes,
+    edges,
+    minimapNodeMap,
+    viewportIndicator,
+    updateViewportFromMinimap,
+  } = useMinimap();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const selectedNodeIdSet = useMemo(
     () => new Set(selectedNodeIds),
@@ -63,6 +71,76 @@ function Minimap(props: MinimapProps) {
       );
     });
 
+  // Handle mouse down to start dragging or jump to position
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    e.stopPropagation(); // Prevent interacting with the world behind
+    const rect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    // Check if clicked inside the viewport indicator
+    const isInside =
+      mouseX >= viewportIndicator.x &&
+      mouseX <= viewportIndicator.x + viewportIndicator.width &&
+      mouseY >= viewportIndicator.y &&
+      mouseY <= viewportIndicator.y + viewportIndicator.height;
+
+    if (isInside) {
+      // Grab at the specific point
+      setDragOffset({
+        x: mouseX - viewportIndicator.x,
+        y: mouseY - viewportIndicator.y,
+      });
+    } else {
+      // Jump to center
+      const newX = mouseX - viewportIndicator.width / 2;
+      const newY = mouseY - viewportIndicator.height / 2;
+      updateViewportFromMinimap(newX, newY);
+      // Set offset to center so subsequent drags feel natural
+      setDragOffset({
+        x: viewportIndicator.width / 2,
+        y: viewportIndicator.height / 2,
+      });
+    }
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    let rafId: number | null = null;
+    const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault();
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        if (!isDragging || !containerRef.current) return;
+
+        const rect = containerRef.current.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const newX = mouseX - dragOffset.x;
+        const newY = mouseY - dragOffset.y;
+
+        updateViewportFromMinimap(newX, newY);
+      });
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, dragOffset, updateViewportFromMinimap]);
+
   return (
     <div {...props}>
       <div
@@ -74,7 +152,8 @@ function Minimap(props: MinimapProps) {
           overflow: "hidden",
           userSelect: "none",
         }}
-        onMouseDown={(e) => e.stopPropagation()}
+        onMouseDown={handleMouseDown}
+        ref={containerRef}
       >
         <svg
           width="100%"
