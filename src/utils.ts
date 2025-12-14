@@ -1,6 +1,4 @@
-import {
-  GRID_SIZE
-} from "./constants";
+import { GRID_SIZE } from "./constants";
 import type { Viewport } from "./types";
 
 export function getRectCenter(
@@ -58,4 +56,8 @@ export function worldToScreen(
 
 export function snapToGrid(value: number) {
   return Math.round(value / GRID_SIZE) * GRID_SIZE;
+}
+
+export function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
 }

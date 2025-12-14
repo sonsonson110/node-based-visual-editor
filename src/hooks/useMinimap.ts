@@ -13,7 +13,7 @@ import {
   setViewport,
 } from "../store/editorSlice";
 import type { WorldBounds } from "../types";
-import { screenToWorld } from "../utils";
+import { clamp, screenToWorld } from "../utils";
 
 export function useMinimap() {
   const dispatch = useAppDispatch();
@@ -97,15 +97,14 @@ export function useMinimap() {
     // Only clamp if the CURRENT viewport is already inside the bounds.
     // This prevents "jumping" when dragging a viewport that is currently out of bounds,
     // but enforces the boundary once the viewport is brought inside.
-
+    const safeBuffer = 0.1;
     const isInsideX = viewportIndicator.x >= 0 && viewportIndicator.x <= maxX;
     if (isInsideX) {
-      nextX = Math.max(0, Math.min(miniX, maxX));
+      nextX = clamp(miniX, 0, maxX - safeBuffer);
     }
-
     const isInsideY = viewportIndicator.y >= 0 && viewportIndicator.y <= maxY;
     if (isInsideY) {
-      nextY = Math.max(0, Math.min(miniY, maxY));
+      nextY = clamp(miniY, 0, maxY - safeBuffer);
     }
 
     const worldX = nextX / minimapScale + worldBounds.x;
