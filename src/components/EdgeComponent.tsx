@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import type { Node } from "../types";
 import { getRectCenterLeft, getRectCenterRight } from "../utils";
-import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 
 interface EdgeComponentProps {
   fromNode: Node;
@@ -12,10 +11,10 @@ function EdgeComponent({ fromNode, toNode }: EdgeComponentProps) {
   const from = getRectCenterRight(
     fromNode.x,
     fromNode.y,
-    NODE_WIDTH,
-    NODE_HEIGHT
+    fromNode.width,
+    fromNode.height
   );
-  const to = getRectCenterLeft(toNode.x, toNode.y, NODE_HEIGHT);
+  const to = getRectCenterLeft(toNode.x, toNode.y, toNode.height);
 
   // Define the length of the straight lines at the start and end
   const straightLineLength = 20;

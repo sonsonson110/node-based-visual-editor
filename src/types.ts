@@ -2,6 +2,8 @@ export interface Node {
   id: string;
   x: number;
   y: number;
+  width: number;
+  height: number;
 }
 
 export interface Edge {

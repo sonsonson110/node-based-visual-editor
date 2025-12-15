@@ -13,6 +13,7 @@ import {
 } from "../store/editorSlice";
 import { screenToWorld } from "../utils";
 import type { Node } from "../types";
+import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from "../constants";
 
 const ControlPanel: React.FC = () => {
   const dispatch = useDispatch();
@@ -51,7 +52,13 @@ const ControlPanel: React.FC = () => {
     };
     const worldPos = screenToWorld(screenCenter.x, screenCenter.y, viewport);
 
-    const newNode: Node = { id: newNodeId, x: worldPos.x, y: worldPos.y };
+    const newNode: Node = {
+      id: newNodeId,
+      x: worldPos.x,
+      y: worldPos.y,
+      width: DEFAULT_NODE_WIDTH,
+      height: DEFAULT_NODE_HEIGHT,
+    };
     dispatch(addNode(newNode));
     setNewNodeId("");
   };

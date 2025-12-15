@@ -2,9 +2,7 @@ import { useMemo } from "react";
 import { useAppDispatch, useAppSelector, useWindowSize } from ".";
 import {
   MINIMAP_HEIGHT,
-  MINIMAP_WIDTH,
-  NODE_HEIGHT,
-  NODE_WIDTH,
+  MINIMAP_WIDTH
 } from "../constants";
 import {
   selectEdges,
@@ -36,8 +34,8 @@ export function useMinimap() {
     nodes.forEach((node) => {
       xMin = Math.min(xMin, node.x);
       yMin = Math.min(yMin, node.y);
-      xMax = Math.max(xMax, node.x + NODE_WIDTH);
-      yMax = Math.max(yMax, node.y + NODE_WIDTH);
+      xMax = Math.max(xMax, node.x + node.width);
+      yMax = Math.max(yMax, node.y + node.height);
     });
     const padding = 200;
     return {
@@ -60,8 +58,8 @@ export function useMinimap() {
       ...node,
       x: (node.x - worldBounds.x) * minimapScale,
       y: (node.y - worldBounds.y) * minimapScale,
-      miniWidth: NODE_WIDTH * minimapScale,
-      miniHeight: NODE_HEIGHT * minimapScale,
+      miniWidth: node.width * minimapScale,
+      miniHeight: node.height * minimapScale,
     }));
   }, [nodes, worldBounds, minimapScale]);
 

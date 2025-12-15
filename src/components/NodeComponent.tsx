@@ -1,5 +1,4 @@
 import React from "react";
-import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
 import type { Node } from "../types";
 
 interface NodeComponentProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -20,8 +19,8 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
         position: "absolute",
         left: node.x,
         top: node.y,
-        width: NODE_WIDTH,
-        height: NODE_HEIGHT,
+        width: node.width,
+        height: node.height,
         border: isDragging ? "2px solid red" : "1px solid #000",
         outline: isSelected ? "2px dashed blue" : "none",
         outlineOffset: 2,

@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
 import type { Edge, Node, Viewport } from "../types";
+import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from "../constants";
 
 interface EditorState {
   nodes: Node[];
@@ -18,6 +19,8 @@ const initialNodes: Node[] = Array.from({ length: 10 }, (_, i) => {
     id: `${i + 1}`,
     x: SCREEN_WIDTH / 2 + 350 * Math.cos(angle),
     y: SCREEN_HEIGHT / 2 + 350 * Math.sin(angle),
+    width: DEFAULT_NODE_WIDTH * (1 + Math.random() * 3),
+    height: DEFAULT_NODE_HEIGHT * (1 + Math.random() * 2),
   };
 });
 

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { useAppDispatch, useAppSelector } from ".";
-import { NODE_HEIGHT, NODE_WIDTH, SNAP_THRESHOLD } from "../constants";
+import { SNAP_THRESHOLD } from "../constants";
 import {
   selectNodes,
   selectSelectedNodeIds,
@@ -261,9 +261,9 @@ export const useMapInteraction = ({
           .filter(
             (node) =>
               node.x >= xMin &&
-              node.x + NODE_WIDTH <= xMax &&
+              node.x + node.width <= xMax &&
               node.y >= yMin &&
-              node.y + NODE_HEIGHT <= yMax
+              node.y + node.height <= yMax
           )
           .map((node) => node.id);
 
