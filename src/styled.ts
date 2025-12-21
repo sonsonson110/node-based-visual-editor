@@ -60,3 +60,72 @@ export const SVGContainer = styled.svg`
   overflow: visible;
   pointer-events: none;
 `;
+
+export const NodeResizer = styled.div<{
+  position: string;
+  outlineOffset?: number;
+}>`
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: blue;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  border: 1px solid #fff;
+
+  ${({ position, outlineOffset }) => {
+    switch (position) {
+      case "top-left":
+        return `
+          top: -${outlineOffset}px;
+          left: -${outlineOffset}px;
+          cursor: nwse-resize;
+        `;
+      case "top-middle":
+        return `
+          top: -${outlineOffset}px;
+          left: 50%;
+          cursor: ns-resize;
+        `;
+      case "top-right":
+        return `
+          top: -${outlineOffset}px;
+          left: calc(100% + ${outlineOffset}px);
+          cursor: nesw-resize;
+        `;
+      case "bottom-left":
+        return `
+          top: calc(100% + ${outlineOffset}px);
+          left: -${outlineOffset}px;
+          cursor: nesw-resize;
+        `;
+      case "bottom-middle":
+        return `
+          top: calc(100% + ${outlineOffset}px);
+          left: 50%;
+          cursor: ns-resize;
+        `;
+      case "bottom-right":
+        return `
+          top: calc(100% + ${outlineOffset}px);
+          left: calc(100% + ${outlineOffset}px);
+          cursor: nwse-resize;
+        `;
+      case "middle-left":
+        return `
+          top: 50%;
+          left: -${outlineOffset}px;
+          cursor: ew-resize;
+        `;
+      case "middle-right":
+        return `
+          top: 50%;
+          left: calc(100% + ${outlineOffset}px);
+          cursor: ew-resize;
+        `;
+      default:
+        return "";
+    }
+  }}
+`;

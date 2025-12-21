@@ -104,7 +104,9 @@ function App() {
           <NodeComponent
             key={node.id}
             node={node}
-            isDragging={draggedNodeId === node.id}
+            isDragging={
+              selectedNodeIdSet.has(node.id) && draggedNodeId !== null
+            }
             isSelected={selectedNodeIdSet.has(node.id)}
             onMouseDown={(e) => {
               if (e.button !== 0) return;
