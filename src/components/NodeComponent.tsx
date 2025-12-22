@@ -56,6 +56,9 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
             key={position}
             position={position}
             outlineOffset={outlineOffset}
+            onMouseDown={(e) => {
+              e.stopPropagation();
+            }}
           />
         ))}
     </div>
