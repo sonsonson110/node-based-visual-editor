@@ -1,6 +1,5 @@
-import React, { useMemo } from "react";
+import React from "react";
 import type { Node } from "../types";
-import { getRectCenterLeft, getRectCenterRight } from "../utils";
 
 interface EdgeComponentProps {
   fromNode: Node;
@@ -8,60 +7,21 @@ interface EdgeComponentProps {
 }
 
 function EdgeComponent({ fromNode, toNode }: EdgeComponentProps) {
-  const from = getRectCenterRight(
-    fromNode.x,
-    fromNode.y,
-    fromNode.width,
-    fromNode.height
-  );
-  const to = getRectCenterLeft(toNode.x, toNode.y, toNode.height);
-
-  // Define the length of the straight lines at the start and end
-  const straightLineLength = 20;
-
-  // Calculate the horizontal distance for a stronger curve
-  const dx = Math.abs(to.cx - from.cx);
-  const curveStrength = Math.max(dx / 2, 50);
-
-  // Define points for the path
-  const startPoint = `${from.cx} ${from.cy}`;
-  const line1End = `${from.cx + straightLineLength} ${from.cy}`;
-  const controlPoint1 = `${from.cx + straightLineLength + curveStrength} ${
-    from.cy
-  }`;
-  const controlPoint2 = `${to.cx - straightLineLength - curveStrength} ${
-    to.cy
-  }`;
-  const line2Start = `${to.cx - straightLineLength} ${to.cy}`;
-  const endPoint = `${to.cx} ${to.cy}`;
-
-  const pathData = useMemo(() => {
-    return `M ${startPoint} L ${line1End} C ${controlPoint1}, ${controlPoint2}, ${line2Start} L ${endPoint}`;
-  }, [
-    startPoint,
-    line1End,
-    controlPoint1,
-    controlPoint2,
-    line2Start,
-    endPoint,
-  ]);
+  const x1 = fromNode.x + fromNode.width / 2;
+  const y1 = fromNode.y + fromNode.height / 2;
+  const x2 = toNode.x + toNode.width / 2;
+  const y2 = toNode.y + toNode.height / 2;
 
   return (
-    <path
-      d={pathData}
+    <line
+      x1={x1}
+      y1={y1}
+      x2={x2}
+      y2={y2}
       stroke="black"
-      strokeWidth={2}
-      fill="none"
-      markerEnd="url(#triangle)"
+      strokeWidth="2"
     />
   );
 }
 
-export default React.memo(EdgeComponent, (prev, next) => {
-  return (
-    prev.fromNode.x === next.fromNode.x &&
-    prev.fromNode.y === next.fromNode.y &&
-    prev.toNode.x === next.toNode.x &&
-    prev.toNode.y === next.toNode.y
-  );
-});
+export default React.memo(EdgeComponent);

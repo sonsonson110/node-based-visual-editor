@@ -78,20 +78,6 @@ function App() {
         }}
       >
         <SVGContainer>
-          <defs>
-            <marker
-              id="triangle"
-              viewBox="0 0 10 10"
-              refX="8"
-              refY="5"
-              markerWidth="6"
-              markerHeight="6"
-              orient="auto"
-            >
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="black" />
-            </marker>
-          </defs>
-
           {edges.map((edge) => {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
