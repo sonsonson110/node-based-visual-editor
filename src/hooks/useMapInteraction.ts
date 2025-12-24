@@ -5,6 +5,7 @@ import { useCanvasPan } from "./useCanvasPan";
 import { useCanvasZoom } from "./useCanvasZoom";
 import { useNodeDrag } from "./useNodeDrag";
 import { useSelectionBox } from "./useSelectionBox";
+import { useNodeResize } from "./useNodeResize";
 
 interface MapInteractionOptions {
   worldContainerRef: RefObject<HTMLDivElement | null>;
@@ -19,9 +20,13 @@ export const useMapInteraction = ({
     worldContainerRef,
   });
 
+  const { resizingNodeId, handleResizeMouseDown } = useNodeResize({
+    worldContainerRef,
+  });
+
   const isPanning = useCanvasPan({
     worldContainerRef,
-    draggedNodeId,
+    shouldPreventPanning: !!draggedNodeId || !!resizingNodeId,
   });
 
   useCanvasZoom();
@@ -60,6 +65,6 @@ export const useMapInteraction = ({
     isPanning,
     draggedNodeId,
     handleNodeMouseDown,
+    handleResizeMouseDown,
   };
 };
-

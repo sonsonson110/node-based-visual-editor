@@ -1,67 +1,32 @@
 import React from "react";
+import { NodeContainer, ResizeHandle } from "../styled";
 import type { Node } from "../types";
-import { NodeResizer } from "../styled";
 
 interface NodeComponentProps extends React.HTMLAttributes<HTMLDivElement> {
   node: Node;
-  isDragging: boolean;
   isSelected: boolean;
+  onMouseDown: (e: React.MouseEvent) => void;
+  onResizeMouseDown: (e: React.MouseEvent) => void;
 }
-
-const nodeResizerPositions = [
-  "top-left",
-  "top-middle",
-  "top-right",
-  "middle-right",
-  "bottom-right",
-  "bottom-middle",
-  "bottom-left",
-  "middle-left",
-] as const;
-
-const outlineOffset = 0;
 
 const NodeComponent: React.FC<NodeComponentProps> = ({
   node,
-  isDragging,
   isSelected,
-  ...rest
+  onMouseDown,
+  onResizeMouseDown,
 }) => {
   return (
-    <div
-      style={{
-        position: "absolute",
-        left: node.x,
-        top: node.y,
-        width: node.width,
-        height: node.height,
-        border: "1px solid #000",
-        outline: isSelected ? "1px dashed blue" : undefined,
-        outlineOffset: outlineOffset,
-        background: "#fff",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        cursor: isDragging ? "grabbing" : "pointer",
-        userSelect: "none",
-        pointerEvents: "auto",
-      }}
-      {...rest}
+    <NodeContainer
+      $x={node.x}
+      $y={node.y}
+      $width={node.width}
+      $height={node.height}
+      $isSelected={isSelected}
+      onMouseDown={onMouseDown}
     >
       {node.id}
-      {!isDragging &&
-        isSelected &&
-        nodeResizerPositions.map((position) => (
-          <NodeResizer
-            key={position}
-            position={position}
-            outlineOffset={outlineOffset}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-            }}
-          />
-        ))}
-    </div>
+      {isSelected && <ResizeHandle onMouseDown={onResizeMouseDown} />}
+    </NodeContainer>
   );
 };
 

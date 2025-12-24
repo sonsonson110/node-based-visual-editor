@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const RootContainer = styled.div`
   width: 100vw;
@@ -61,71 +61,37 @@ export const SVGContainer = styled.svg`
   pointer-events: none;
 `;
 
-export const NodeResizer = styled.div<{
-  position: string;
-  outlineOffset?: number;
+export const NodeContainer = styled.div<{
+  $x: number;
+  $y: number;
+  $width: number;
+  $height: number;
+  $isSelected: boolean;
 }>`
+  ${({ $x, $y, $width, $height, $isSelected }) => css`
+    left: ${$x}px;
+    top: ${$y}px;
+    width: ${$width}px;
+    height: ${$height}px;
+    border: ${$isSelected ? "2px solid #007bff" : "2px solid black"};
+  `}
   position: absolute;
-  width: 8px;
-  height: 8px;
-  background: blue;
-  border-radius: 9999px;
-  transform: translate(-50%, -50%);
-  z-index: 10;
-  border: 1px solid #fff;
+  background: white;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
-  ${({ position, outlineOffset }) => {
-    switch (position) {
-      case "top-left":
-        return `
-          top: -${outlineOffset}px;
-          left: -${outlineOffset}px;
-          cursor: nwse-resize;
-        `;
-      case "top-middle":
-        return `
-          top: -${outlineOffset}px;
-          left: 50%;
-          cursor: ns-resize;
-        `;
-      case "top-right":
-        return `
-          top: -${outlineOffset}px;
-          left: calc(100% + ${outlineOffset}px);
-          cursor: nesw-resize;
-        `;
-      case "bottom-left":
-        return `
-          top: calc(100% + ${outlineOffset}px);
-          left: -${outlineOffset}px;
-          cursor: nesw-resize;
-        `;
-      case "bottom-middle":
-        return `
-          top: calc(100% + ${outlineOffset}px);
-          left: 50%;
-          cursor: ns-resize;
-        `;
-      case "bottom-right":
-        return `
-          top: calc(100% + ${outlineOffset}px);
-          left: calc(100% + ${outlineOffset}px);
-          cursor: nwse-resize;
-        `;
-      case "middle-left":
-        return `
-          top: 50%;
-          left: -${outlineOffset}px;
-          cursor: ew-resize;
-        `;
-      case "middle-right":
-        return `
-          top: 50%;
-          left: calc(100% + ${outlineOffset}px);
-          cursor: ew-resize;
-        `;
-      default:
-        return "";
-    }
-  }}
+export const ResizeHandle = styled.div`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  cursor: nwse-resize;
+  background: linear-gradient(135deg, transparent 50%, #007bff 50%);
+  border-bottom-right-radius: 2px;
 `;

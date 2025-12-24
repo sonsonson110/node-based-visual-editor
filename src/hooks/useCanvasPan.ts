@@ -4,12 +4,12 @@ import { selectViewport, setViewport } from "../store/editorSlice";
 
 interface UseCanvasPanOptions {
   worldContainerRef: RefObject<HTMLDivElement | null>;
-  draggedNodeId: string | null;
+  shouldPreventPanning?: boolean;
 }
 
 export const useCanvasPan = ({
   worldContainerRef,
-  draggedNodeId,
+  shouldPreventPanning = false,
 }: UseCanvasPanOptions) => {
   const dispatch = useAppDispatch();
   const viewport = useAppSelector(selectViewport);
@@ -23,7 +23,7 @@ export const useCanvasPan = ({
     if (!container) return;
 
     function handleMouseDown(e: MouseEvent) {
-      if (draggedNodeId) return;
+      if (shouldPreventPanning) return;
       if (e.button === 1 || e.button === 2) {
         setIsPanning(true);
         panStart.current = { x: e.pageX - viewport.x, y: e.pageY - viewport.y };
@@ -33,7 +33,13 @@ export const useCanvasPan = ({
     return () => {
       document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [dispatch, draggedNodeId, viewport.x, viewport.y, worldContainerRef]);
+  }, [
+    dispatch,
+    shouldPreventPanning,
+    viewport.x,
+    viewport.y,
+    worldContainerRef,
+  ]);
 
   // Panning logic - mousemove and mouseup handlers
   useEffect(() => {

@@ -27,10 +27,15 @@ function App() {
 
   const worldContainerRef = useRef<HTMLDivElement>(null);
 
-  const { selectionBox, isPanning, draggedNodeId, handleNodeMouseDown } =
-    useMapInteraction({
-      worldContainerRef,
-    });
+  const {
+    selectionBox,
+    isPanning,
+    draggedNodeId,
+    handleNodeMouseDown,
+    handleResizeMouseDown,
+  } = useMapInteraction({
+    worldContainerRef,
+  });
 
   const selectedNodeIdSet = useMemo(
     () => new Set(selectedNodeIds),
@@ -104,15 +109,13 @@ function App() {
           <NodeComponent
             key={node.id}
             node={node}
-            isDragging={
-              selectedNodeIdSet.has(node.id) && draggedNodeId !== null
-            }
             isSelected={selectedNodeIdSet.has(node.id)}
             onMouseDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();
               handleNodeMouseDown(e.pageX, e.pageY, node.id, e.shiftKey);
             }}
+            onResizeMouseDown={(e) => handleResizeMouseDown(e, node.id)}
           />
         ))}
       </WorldContainer>
