@@ -71,9 +71,9 @@ export const NodeContainer = styled.div<{
   ${({ $x, $y, $width, $height, $isSelected }) => css`
     left: ${$x}px;
     top: ${$y}px;
-    width: ${$width}px;
-    height: ${$height}px;
-    border: ${$isSelected ? "2px solid #007bff" : "2px solid black"};
+    width: ${$width - 2}px;
+    height: ${$height - 2}px;
+    border: ${$isSelected ? "1px solid #007bff" : "1px solid black"};
   `}
   position: absolute;
   background: white;
@@ -87,10 +87,10 @@ export const NodeContainer = styled.div<{
 
 export const ResizeHandle = styled.div`
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 12px;
-  height: 12px;
+  bottom: -1px;
+  right: -1px;
+  width: 8px;
+  height: 8px;
   cursor: nwse-resize;
   background: linear-gradient(135deg, transparent 50%, #007bff 50%);
   border-bottom-right-radius: 2px;
