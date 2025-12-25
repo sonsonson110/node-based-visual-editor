@@ -87,8 +87,8 @@ export const NodeContainer = styled.div<{
 
 export const ResizeHandle = styled.div`
   position: absolute;
-  bottom: -1px;
-  right: -1px;
+  bottom: 0;
+  right: 0;
   width: 8px;
   height: 8px;
   cursor: nwse-resize;
