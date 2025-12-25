@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { useAppDispatch, useAppSelector } from ".";
+import { MINIMUM_NODE_SIZE, SNAP_THRESHOLD } from "../constants";
 import { selectNodes, selectViewport, setNodes } from "../store/editorSlice";
-import { screenToWorld } from "../utils";
+import { screenToWorld, snapToGrid } from "../utils";
 
 interface UseNodeResizeOptions {
   worldContainerRef: RefObject<HTMLDivElement | null>;
@@ -18,6 +19,8 @@ export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
     startY: number;
     initialWidth: number;
     initialHeight: number;
+    nodeX: number;
+    nodeY: number;
   } | null>(null);
   const resizeRaf = useRef<number | null>(null);
 
@@ -31,15 +34,36 @@ export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
       }
 
       resizeRaf.current = requestAnimationFrame(() => {
+        const snapEnabled = !e.altKey;
         const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
-        const { startX, startY, initialWidth, initialHeight } =
+        const { startX, startY, initialWidth, initialHeight, nodeX, nodeY } =
           resizeStart.current!;
 
         const deltaX = worldPos.x - startX;
         const deltaY = worldPos.y - startY;
 
-        const newWidth = Math.max(50, initialWidth + deltaX);
-        const newHeight = Math.max(50, initialHeight + deltaY);
+        let newWidth = initialWidth + deltaX;
+        let newHeight = initialHeight + deltaY;
+
+        if (snapEnabled) {
+          // Snap the right and bottom edges to the grid
+          const rightEdge = nodeX + newWidth;
+          const bottomEdge = nodeY + newHeight;
+
+          const snappedRight = snapToGrid(rightEdge);
+          const snappedBottom = snapToGrid(bottomEdge);
+
+          if (Math.abs(snappedRight - rightEdge) < SNAP_THRESHOLD) {
+            newWidth = snappedRight - nodeX;
+          }
+          if (Math.abs(snappedBottom - bottomEdge) < SNAP_THRESHOLD) {
+            newHeight = snappedBottom - nodeY;
+          }
+        }
+
+        // Enforce minimum dimensions
+        newWidth = Math.max(MINIMUM_NODE_SIZE, newWidth);
+        newHeight = Math.max(MINIMUM_NODE_SIZE, newHeight);
 
         dispatch(
           setNodes(
@@ -92,6 +116,8 @@ export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
       startY: worldPos.y,
       initialWidth: node.width,
       initialHeight: node.height,
+      nodeX: node.x,
+      nodeY: node.y,
     };
   };
 
