@@ -82,5 +82,6 @@ This requires several architectural updates:
 
 - Implemented a resize handle on the bottom-right corner of every selected node.
 - Created a dedicated `useNodeResize` hook to calculate dimensions based on mouse deltas in world space.
+- Added **Snap-to-Grid** support for resizing operations (hold `Alt` to disable).
 - Updated the Redux store to support dynamic `width` and `height` properties on nodes.
 - Refactored `EdgeComponent` to calculate connection points based on the node's center (dynamic width/height), ensuring edges stay attached correctly during resize operations.

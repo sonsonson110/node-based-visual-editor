@@ -31,6 +31,7 @@ function App() {
     selectionBox,
     isPanning,
     draggedNodeId,
+    resizingNodeId,
     handleNodeMouseDown,
     handleResizeMouseDown,
   } = useMapInteraction({
@@ -96,6 +97,7 @@ function App() {
             key={node.id}
             node={node}
             isSelected={selectedNodeIdSet.has(node.id)}
+            isResizing={resizingNodeId === node.id}
             onMouseDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();

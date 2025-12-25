@@ -95,3 +95,17 @@ export const ResizeHandle = styled.div`
   background: linear-gradient(135deg, transparent 50%, #007bff 50%);
   border-bottom-right-radius: 2px;
 `;
+
+export const NodeResizingIndicator = styled.div`
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 4px;
+  width: max-content;
+  background: rgba(0, 123, 255, 0.1);
+  border: 2px dashed #007bff;
+  pointer-events: none;
+  font-size: 10px;
+  margin-top: 4px;
+`;

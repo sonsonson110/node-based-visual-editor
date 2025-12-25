@@ -64,6 +64,7 @@ export const useMapInteraction = ({
     selectionBox,
     isPanning,
     draggedNodeId,
+    resizingNodeId,
     handleNodeMouseDown,
     handleResizeMouseDown,
   };

@@ -7,4 +7,4 @@ export const SNAP_THRESHOLD = 8;
 export const MINIMAP_WIDTH = 300;
 export const MINIMAP_HEIGHT = 200;
 
-export const MINIMUM_NODE_SIZE = 20;
+export const MINIMUM_NODE_SIZE = 40;
