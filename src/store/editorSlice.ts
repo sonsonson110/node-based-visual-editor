@@ -13,36 +13,20 @@ interface EditorState {
 const SCREEN_WIDTH = window.innerWidth;
 const SCREEN_HEIGHT = window.innerHeight;
 
-const initialNodes: Node[] = Array.from({ length: 10 }, (_, i) => {
-  const angle = (i / 10) * 2 * Math.PI;
-  return {
-    id: `${i + 1}`,
-    x: SCREEN_WIDTH / 2 + 350 * Math.cos(angle),
-    y: SCREEN_HEIGHT / 2 + 350 * Math.sin(angle),
-    width: DEFAULT_NODE_WIDTH * (1 + Math.random() * 3),
-    height: DEFAULT_NODE_HEIGHT * (1 + Math.random() * 2),
-  };
-});
+const initialNodes: Node[] = Array.from({ length: 5 }, (_, i) => ({
+  id: `${i + 1}`,
+  x:
+    SCREEN_WIDTH / 2 -
+    2 * (DEFAULT_NODE_WIDTH + 40) +
+    i * (DEFAULT_NODE_WIDTH + 40),
+  y: SCREEN_HEIGHT / 2,
+  width: DEFAULT_NODE_WIDTH,
+  height: DEFAULT_NODE_HEIGHT,
+}));
 
 const initialState: EditorState = {
   nodes: initialNodes,
-  edges: [
-    { from: "1", to: "2" },
-    { from: "1", to: "3" },
-    { from: "1", to: "4" },
-    { from: "2", to: "5" },
-    { from: "2", to: "6" },
-    { from: "3", to: "7" },
-    { from: "4", to: "8" },
-    { from: "5", to: "9" },
-    { from: "6", to: "9" },
-    { from: "7", to: "10" },
-    { from: "8", to: "10" },
-    { from: "9", to: "10" },
-    { from: "10", to: "1" },
-    { from: "3", to: "5" },
-    { from: "4", to: "6" },
-  ],
+  edges: [],
   selectedNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
 };
