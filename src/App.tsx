@@ -9,6 +9,7 @@ import {
   selectNodes,
   selectSelectedNodeIds,
   selectViewport,
+  selectMapOrientation,
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -24,6 +25,7 @@ function App() {
   const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
+  const mapOrientation = useAppSelector(selectMapOrientation);
 
   const worldContainerRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +81,19 @@ function App() {
         }}
       >
         <SVGContainer>
+          <defs>
+            <marker
+              id="arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="0"
+              refY="3.5"
+              orient="auto"
+              markerUnits="userSpaceOnUse"
+            >
+              <polygon points="0 0, 10 3.5, 0 7" fill="#555" />
+            </marker>
+          </defs>
           {edges.map((edge) => {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
@@ -88,6 +103,7 @@ function App() {
                 key={`${edge.from}->${edge.to}`}
                 fromNode={fromNode}
                 toNode={toNode}
+                orientation={mapOrientation}
               />
             );
           })}
