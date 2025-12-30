@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../store";
-import type { Edge, Node, Viewport } from "../types";
+import type { Edge, MapOrientation, Node, Viewport } from "../types";
 import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from "../constants";
 
 interface EditorState {
@@ -8,6 +8,7 @@ interface EditorState {
   edges: Edge[];
   selectedNodeIds: Array<string>;
   viewport: Viewport;
+  mapOrientation: MapOrientation;
 }
 
 const SCREEN_WIDTH = window.innerWidth;
@@ -29,6 +30,7 @@ const initialState: EditorState = {
   edges: [],
   selectedNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
+  mapOrientation: "top-down",
 };
 
 export const editorSlice = createSlice({
@@ -53,6 +55,9 @@ export const editorSlice = createSlice({
     setViewport: (state, action: PayloadAction<Partial<Viewport>>) => {
       state.viewport = { ...state.viewport, ...action.payload };
     },
+    setMapOrientation: (state, action: PayloadAction<MapOrientation>) => {
+      state.mapOrientation = action.payload;
+    },
   },
 });
 
@@ -63,6 +68,7 @@ export const {
   setSelectedNodeIds,
   setViewport,
   setEdges,
+  setMapOrientation,
 } = editorSlice.actions;
 
 // Selectors
@@ -71,5 +77,7 @@ export const selectEdges = (state: RootState) => state.editor.edges;
 export const selectSelectedNodeIds = (state: RootState) =>
   state.editor.selectedNodeIds;
 export const selectViewport = (state: RootState) => state.editor.viewport;
+export const selectMapOrientation = (state: RootState) =>
+  state.editor.mapOrientation;
 
 export default editorSlice.reducer;

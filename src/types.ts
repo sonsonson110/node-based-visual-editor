@@ -1,3 +1,5 @@
+import type { MAP_ORIENTATIONS } from "./constants";
+
 export interface Node {
   id: string;
   x: number;
@@ -30,3 +32,5 @@ export interface WorldBounds {
   width: number;
   height: number;
 }
+
+export type MapOrientation = (typeof MAP_ORIENTATIONS)[number];

@@ -5,15 +5,21 @@ import {
   addEdge,
   addNode,
   selectEdges,
+  selectMapOrientation,
   selectNodes,
   selectSelectedNodeIds,
   selectViewport,
   setEdges,
+  setMapOrientation,
   setNodes,
 } from "../store/editorSlice";
 import { screenToWorld } from "../utils";
 import type { Node } from "../types";
-import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH } from "../constants";
+import {
+  DEFAULT_NODE_HEIGHT,
+  DEFAULT_NODE_WIDTH,
+  MAP_ORIENTATIONS,
+} from "../constants";
 
 const ControlPanel: React.FC = () => {
   const dispatch = useDispatch();
@@ -21,6 +27,7 @@ const ControlPanel: React.FC = () => {
   const edges = useSelector(selectEdges);
   const viewport = useSelector(selectViewport);
   const selectedNodeIds = useSelector(selectSelectedNodeIds);
+  const selectedMapOrientation = useSelector(selectMapOrientation);
 
   const [newNodeId, setNewNodeId] = useState("");
   const [fromNode, setFromNode] = useState("");
@@ -129,6 +136,21 @@ const ControlPanel: React.FC = () => {
         >
           Remove Selected Nodes
         </button>
+      </InputGroup>
+      <InputGroup>
+        <span>Map Orientation</span>
+        {MAP_ORIENTATIONS.map((orientation) => (
+          <div style={{ display: "flex", alignItems: "center" }}>
+            <input
+              type="radio"
+              name="mapOrientation"
+              value={orientation}
+              checked={selectedMapOrientation === orientation}
+              onChange={() => dispatch(setMapOrientation(orientation))}
+            />
+            <label key={orientation}>{orientation}</label>
+          </div>
+        ))}
       </InputGroup>
     </UIContainer>
   );

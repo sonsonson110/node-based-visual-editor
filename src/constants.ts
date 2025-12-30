@@ -8,3 +8,5 @@ export const MINIMAP_WIDTH = 300;
 export const MINIMAP_HEIGHT = 200;
 
 export const MINIMUM_NODE_SIZE = 40;
+
+export const MAP_ORIENTATIONS = ["top-down", "left-right"] as const;
