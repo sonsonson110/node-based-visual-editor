@@ -27,7 +27,12 @@ const initialNodes: Node[] = Array.from({ length: 5 }, (_, i) => ({
 
 const initialState: EditorState = {
   nodes: initialNodes,
-  edges: [],
+  edges: [
+    { from: "1", to: "2" },
+    { from: "2", to: "3" },
+    { from: "3", to: "4" },
+    { from: "4", to: "5" },
+  ],
   selectedNodeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   mapOrientation: "top-down",
