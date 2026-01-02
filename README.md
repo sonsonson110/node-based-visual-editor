@@ -85,3 +85,15 @@ This requires several architectural updates:
 - Added **Snap-to-Grid** support for resizing operations (hold `Alt` to disable).
 - Updated the Redux store to support dynamic `width` and `height` properties on nodes.
 - Refactored `EdgeComponent` to calculate connection points based on the node's center (dynamic width/height), ensuring edges stay attached correctly during resize operations.
+
+## Phase 10: Edge Styling & Map Orientation
+
+- **Curved Edges**: Replaced simple straight lines with smooth cubic Bezier curves for a more professional look.
+- **Directional Arrows**: Added arrowhead markers to edges to clearly indicate flow direction.
+- **Map Orientation Support**:
+  - Implemented "Top-Down" and "Left-Right" layout modes.
+  - Edges dynamically adjust their start/end points and curve control points based on the selected orientation.
+  - Added controls to the UI to switch between orientations.
+- **Visual Polish**:
+  - Fine-tuned arrow sizes and positioning to ensure seamless connection with edge strokes.
+  - Adjusted curve tension to prevent "disconnected" feelings when nodes are close or aligned.
