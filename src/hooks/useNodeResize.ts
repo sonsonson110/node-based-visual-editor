@@ -25,9 +25,10 @@ export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
   const resizeRaf = useRef<number | null>(null);
 
   useEffect(() => {
+    const container = worldContainerRef.current;
+    if (!container) return;
     function handleMouseMove(e: MouseEvent) {
-      if (!resizingNodeId || !worldContainerRef.current || !resizeStart.current)
-        return;
+      if (!resizingNodeId || !resizeStart.current) return;
 
       if (resizeRaf.current) {
         cancelAnimationFrame(resizeRaf.current);

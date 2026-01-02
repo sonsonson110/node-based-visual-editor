@@ -28,6 +28,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
       $height={node.height}
       $isSelected={isSelected}
       onMouseDown={onMouseDown}
+      data-interactive
     >
       {node.id}
       {isSelected && <ResizeHandle onMouseDown={onResizeMouseDown} />}

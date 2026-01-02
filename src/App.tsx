@@ -1,17 +1,20 @@
 import { useMemo, useRef } from "react";
 import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
+import Minimap from "./components/Minimap";
 import NodeComponent from "./components/NodeComponent";
 import SelectionBox from "./components/SelectionBox";
-import { useAppSelector, useMapInteraction, useAppDispatch } from "./hooks";
+import { GRID_SIZE } from "./constants";
+import { useAppDispatch, useAppSelector, useMapInteraction } from "./hooks";
 import {
   selectEdges,
-  selectNodes,
-  selectSelectedNodeIds,
-  selectSelectedEdgeIds,
-  selectViewport,
   selectMapOrientation,
+  selectNodes,
+  selectSelectedEdgeIds,
+  selectSelectedNodeIds,
+  selectViewport,
   setSelectedEdgeIds,
+  setSelectedNodeIds,
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -19,8 +22,6 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
-import { GRID_SIZE } from "./constants";
-import Minimap from "./components/Minimap";
 import { getEdgeId } from "./utils";
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
   }, [draggedNodeId, nodeMap]);
 
   const handleEdgeClick = (e: React.MouseEvent, edgeId: string) => {
+    e.preventDefault();
     e.stopPropagation();
     if (e.shiftKey) {
       if (selectedEdgeIdSet.has(edgeId)) {
@@ -77,6 +79,7 @@ function App() {
       }
     } else {
       dispatch(setSelectedEdgeIds([edgeId]));
+      dispatch(setSelectedNodeIds([]));
     }
   };
 
@@ -134,6 +137,7 @@ function App() {
             onMouseDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();
+              e.stopPropagation();
               handleNodeMouseDown(e.pageX, e.pageY, node.id, e.shiftKey);
             }}
             onResizeMouseDown={(e) => handleResizeMouseDown(e, node.id)}

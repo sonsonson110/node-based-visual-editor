@@ -12,7 +12,6 @@ interface MapInteractionOptions {
 export const useMapInteraction = ({
   worldContainerRef,
 }: MapInteractionOptions) => {
-
   const { draggedNodeId, handleNodeMouseDown } = useNodeDrag({
     worldContainerRef,
   });

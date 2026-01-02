@@ -6,6 +6,7 @@ import {
   selectSelectedNodeIds,
   selectViewport,
   setNodes,
+  setSelectedEdgeIds,
   setSelectedNodeIds,
 } from "../store/editorSlice";
 import { screenToWorld, snapToGrid } from "../utils";
@@ -133,6 +134,10 @@ export const useNodeDrag = ({ worldContainerRef }: UseNodeDragOptions) => {
         })
         .filter((entry) => entry !== null);
     };
+
+    if (!withShiftKey) {
+      dispatch(setSelectedEdgeIds([]));
+    }
 
     if (selectedNodeIdSet.has(nodeId)) {
       if (withShiftKey) {

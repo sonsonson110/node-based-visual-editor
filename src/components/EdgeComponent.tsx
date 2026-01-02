@@ -19,17 +19,17 @@ function EdgeComponent({
   onClick,
   color,
 }: EdgeComponentProps) {
-  const { path, x2, y2 } = getEdgeMetrics(
-    fromNode,
-    toNode,
-    orientation
-  );
+  const { path, x2, y2 } = getEdgeMetrics(fromNode, toNode, orientation);
 
   const angle = orientation === "left-right" ? 0 : 90;
   const edgeColor = color || "#555";
 
   return (
-    <g onClick={onClick} style={{ pointerEvents: "all", cursor: "pointer" }}>
+    <g
+      onClick={onClick}
+      style={{ pointerEvents: "all", cursor: "pointer" }}
+      data-interactive
+    >
       {/* Hit area - invisible but clickable */}
       <path d={path} stroke="transparent" strokeWidth="6" fill="none" />
       <g transform={`translate(${x2}, ${y2}) rotate(${angle})`}>
@@ -47,7 +47,7 @@ function EdgeComponent({
           <path
             d={path}
             stroke="rgba(0, 123, 255, 0.5)"
-            strokeWidth="4"
+            strokeWidth="6"
             fill="none"
           />
           <g transform={`translate(${x2}, ${y2}) rotate(${angle})`}>
