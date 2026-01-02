@@ -1,5 +1,5 @@
 import React from "react";
-import type { Node, MapOrientation } from "../types";
+import type { MapOrientation, Node } from "../types";
 import { getEdgeMetrics } from "../utils";
 
 interface EdgeComponentProps {
@@ -8,6 +8,7 @@ interface EdgeComponentProps {
   orientation: MapOrientation;
   isSelected?: boolean;
   onClick?: (e: React.MouseEvent) => void;
+  color?: string;
 }
 
 function EdgeComponent({
@@ -16,37 +17,52 @@ function EdgeComponent({
   orientation,
   isSelected,
   onClick,
+  color,
 }: EdgeComponentProps) {
-  const { path } = getEdgeMetrics(fromNode, toNode, orientation);
+  const { path, x2, y2 } = getEdgeMetrics(
+    fromNode,
+    toNode,
+    orientation
+  );
+
+  const angle = orientation === "left-right" ? 0 : 90;
+  const edgeColor = color || "#555";
 
   return (
     <g onClick={onClick} style={{ pointerEvents: "all", cursor: "pointer" }}>
       {/* Hit area - invisible but clickable */}
-      <path
-        d={path}
-        stroke="transparent"
-        strokeWidth="4"
-        fill="none"
-      />
-      
+      <path d={path} stroke="transparent" strokeWidth="6" fill="none" />
+      <g transform={`translate(${x2}, ${y2}) rotate(${angle})`}>
+        <polygon
+          points="-2,-6 13,0 -2,6"
+          fill="transparent"
+          stroke="transparent"
+          strokeWidth="0"
+        />
+      </g>
+
       {/* Selection highlight */}
       {isSelected && (
-        <path
-          d={path}
-          stroke="rgba(0, 123, 255, 0.3)"
-          strokeWidth="4"
-          fill="none"
-        />
+        <>
+          <path
+            d={path}
+            stroke="rgba(0, 123, 255, 0.5)"
+            strokeWidth="6"
+            fill="none"
+          />
+          <g transform={`translate(${x2}, ${y2}) rotate(${angle})`}>
+            <polygon points="-2,-6 13,0 -2,6" fill="rgba(0, 123, 255, 0.5)" />
+          </g>
+        </>
       )}
 
       {/* Visible edge */}
-      <path
-        d={path}
-        stroke="#555"
-        strokeWidth="2"
-        fill="none"
-        markerEnd="url(#arrowhead)"
-      />
+      <path d={path} stroke={edgeColor} strokeWidth="2" fill="none" />
+
+      {/* Arrowhead */}
+      <g transform={`translate(${x2}, ${y2}) rotate(${angle})`}>
+        <polygon points="0,-3.5 10,0 0,3.5" fill={edgeColor} />
+      </g>
     </g>
   );
 }

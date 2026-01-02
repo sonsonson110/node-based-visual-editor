@@ -106,19 +106,6 @@ function App() {
         }}
       >
         <SVGContainer>
-          <defs>
-            <marker
-              id="arrowhead"
-              markerWidth="10"
-              markerHeight="7"
-              refX="0"
-              refY="3.5"
-              orient="auto"
-              markerUnits="userSpaceOnUse"
-            >
-              <polygon points="0 0, 10 3.5, 0 7" fill="#555" />
-            </marker>
-          </defs>
           {edges.map((edge) => {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
@@ -133,6 +120,7 @@ function App() {
                 orientation={mapOrientation}
                 isSelected={selectedEdgeIdSet.has(edgeId)}
                 onClick={(e) => handleEdgeClick(e, edgeId)}
+                color={edge.color}
               />
             );
           })}
