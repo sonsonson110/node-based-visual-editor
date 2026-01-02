@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from ".";
 import { SNAP_THRESHOLD } from "../constants";
 import {
@@ -11,11 +11,7 @@ import {
 } from "../store/editorSlice";
 import { screenToWorld, snapToGrid } from "../utils";
 
-interface UseNodeDragOptions {
-  worldContainerRef: RefObject<HTMLDivElement | null>;
-}
-
-export const useNodeDrag = ({ worldContainerRef }: UseNodeDragOptions) => {
+export const useNodeDrag = () => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const viewport = useAppSelector(selectViewport);
@@ -42,7 +38,7 @@ export const useNodeDrag = ({ worldContainerRef }: UseNodeDragOptions) => {
   // Dragging logic
   useEffect(() => {
     function handleMouseMove(e: MouseEvent) {
-      if (!draggedNodeId || !worldContainerRef.current) return;
+      if (!draggedNodeId) return;
       if (dragRaf.current) {
         cancelAnimationFrame(dragRaf.current);
       }
@@ -103,14 +99,7 @@ export const useNodeDrag = ({ worldContainerRef }: UseNodeDragOptions) => {
         cancelAnimationFrame(dragRaf.current);
       }
     };
-  }, [
-    dispatch,
-    draggedNodeId,
-    nodes,
-    selectedNodeIds,
-    viewport,
-    worldContainerRef,
-  ]);
+  }, [dispatch, draggedNodeId, nodes, selectedNodeIds, viewport]);
 
   const handleNodeMouseDown = (
     pageX: number,

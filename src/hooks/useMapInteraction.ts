@@ -12,13 +12,9 @@ interface MapInteractionOptions {
 export const useMapInteraction = ({
   worldContainerRef,
 }: MapInteractionOptions) => {
-  const { draggedNodeId, handleNodeMouseDown } = useNodeDrag({
-    worldContainerRef,
-  });
+  const { draggedNodeId, handleNodeMouseDown } = useNodeDrag();
 
-  const { resizingNodeId, handleResizeMouseDown } = useNodeResize({
-    worldContainerRef,
-  });
+  const { resizingNodeId, handleResizeMouseDown } = useNodeResize();
 
   const isPanning = useCanvasPan({
     worldContainerRef,

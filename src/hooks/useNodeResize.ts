@@ -1,14 +1,10 @@
-import { useEffect, useRef, useState, type RefObject } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from ".";
 import { MINIMUM_NODE_SIZE, SNAP_THRESHOLD } from "../constants";
 import { selectNodes, selectViewport, setNodes } from "../store/editorSlice";
 import { screenToWorld, snapToGrid } from "../utils";
 
-interface UseNodeResizeOptions {
-  worldContainerRef: RefObject<HTMLDivElement | null>;
-}
-
-export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
+export const useNodeResize = () => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const viewport = useAppSelector(selectViewport);
@@ -25,8 +21,6 @@ export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
   const resizeRaf = useRef<number | null>(null);
 
   useEffect(() => {
-    const container = worldContainerRef.current;
-    if (!container) return;
     function handleMouseMove(e: MouseEvent) {
       if (!resizingNodeId || !resizeStart.current) return;
 
@@ -101,7 +95,7 @@ export const useNodeResize = ({ worldContainerRef }: UseNodeResizeOptions) => {
         cancelAnimationFrame(resizeRaf.current);
       }
     };
-  }, [dispatch, nodes, resizingNodeId, viewport, worldContainerRef]);
+  }, [dispatch, nodes, resizingNodeId, viewport]);
 
   const handleResizeMouseDown = (e: React.MouseEvent, nodeId: string) => {
     e.stopPropagation();
