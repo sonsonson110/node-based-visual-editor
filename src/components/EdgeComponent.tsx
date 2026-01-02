@@ -47,7 +47,7 @@ function EdgeComponent({
           <path
             d={path}
             stroke="rgba(0, 123, 255, 0.5)"
-            strokeWidth="6"
+            strokeWidth="4"
             fill="none"
           />
           <g transform={`translate(${x2}, ${y2}) rotate(${angle})`}>
