@@ -104,45 +104,71 @@ const ControlPanel: React.FC = () => {
 
   return (
     <UIContainer onMouseDown={(e) => e.stopPropagation()}>
+      {/* Node Controls */}
       <InputGroup>
-        <input
-          type="text"
-          placeholder="New Node ID"
-          value={newNodeId}
-          onChange={(e) => setNewNodeId(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAddNode()}
-        />
-        <button onClick={handleAddNode}>Add Node</button>
-      </InputGroup>
-      <InputGroup>
-        <input
-          type="text"
-          placeholder="From Node ID"
-          value={fromNode}
-          onChange={(e) => setFromNode(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="To Node ID"
-          value={toNode}
-          onChange={(e) => setToNode(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
-        />
-        <button onClick={handleAddEdge}>Add Edge</button>
-        <span>Selected Edges: {selectedEdgeIds.length}</span>
-      </InputGroup>
-      <InputGroup>
-        <span>Selected Nodes: {selectedNodeIds.length}</span>
-        <button
-          onClick={handleRemoveSelectedNodes}
-          disabled={selectedNodeIds.length === 0}
+        <strong>Nodes</strong>
+        <div style={{ display: "flex", gap: "5px" }}>
+          <input
+            type="text"
+            placeholder="New Node ID"
+            value={newNodeId}
+            onChange={(e) => setNewNodeId(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddNode()}
+            style={{ flex: 1 }}
+          />
+          <button onClick={handleAddNode}>Add</button>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
         >
-          Remove Selected Nodes
-        </button>
+          <span>Selected: {selectedNodeIds.length}</span>
+          <button
+            onClick={handleRemoveSelectedNodes}
+            disabled={selectedNodeIds.length === 0}
+          >
+            Remove
+          </button>
+        </div>
       </InputGroup>
+
+      <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
+
+      {/* Edge Controls */}
       <InputGroup>
-        <span>Map Orientation</span>
-        <div style={{ alignSelf: "flex-start" }}>
+        <strong>Edges</strong>
+        <div style={{ display: "flex", gap: "5px" }}>
+          <input
+            type="text"
+            placeholder="From"
+            value={fromNode}
+            onChange={(e) => setFromNode(e.target.value)}
+            style={{ width: "60px" }}
+          />
+          <input
+            type="text"
+            placeholder="To"
+            value={toNode}
+            onChange={(e) => setToNode(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
+            style={{ width: "60px" }}
+          />
+          <button onClick={handleAddEdge} style={{ flex: 1 }}>
+            Add
+          </button>
+        </div>
+        <span>Selected: {selectedEdgeIds.length}</span>
+      </InputGroup>
+
+      <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
+
+      {/* Orientation Controls */}
+      <InputGroup>
+        <strong>Orientation</strong>
+        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
           {MAP_ORIENTATIONS.map((orientation) => (
             <label
               key={orientation}
