@@ -7,6 +7,7 @@ interface EditorState {
   nodes: Node[];
   edges: Edge[];
   selectedNodeIds: Array<string>;
+  selectedEdgeIds: Array<string>;
   viewport: Viewport;
   mapOrientation: MapOrientation;
 }
@@ -34,6 +35,7 @@ const initialState: EditorState = {
     { from: "4", to: "5" },
   ],
   selectedNodeIds: [],
+  selectedEdgeIds: [],
   viewport: { x: 0, y: 0, zoom: 1 },
   mapOrientation: "top-down",
 };
@@ -57,6 +59,9 @@ export const editorSlice = createSlice({
     setSelectedNodeIds: (state, action: PayloadAction<Array<string>>) => {
       state.selectedNodeIds = action.payload;
     },
+    setSelectedEdgeIds: (state, action: PayloadAction<Array<string>>) => {
+      state.selectedEdgeIds = action.payload;
+    },
     setViewport: (state, action: PayloadAction<Partial<Viewport>>) => {
       state.viewport = { ...state.viewport, ...action.payload };
     },
@@ -71,6 +76,7 @@ export const {
   addNode,
   addEdge,
   setSelectedNodeIds,
+  setSelectedEdgeIds,
   setViewport,
   setEdges,
   setMapOrientation,
@@ -81,6 +87,8 @@ export const selectNodes = (state: RootState) => state.editor.nodes;
 export const selectEdges = (state: RootState) => state.editor.edges;
 export const selectSelectedNodeIds = (state: RootState) =>
   state.editor.selectedNodeIds;
+export const selectSelectedEdgeIds = (state: RootState) =>
+  state.editor.selectedEdgeIds;
 export const selectViewport = (state: RootState) => state.editor.viewport;
 export const selectMapOrientation = (state: RootState) =>
   state.editor.mapOrientation;

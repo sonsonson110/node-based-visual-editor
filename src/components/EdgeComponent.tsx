@@ -6,13 +6,21 @@ interface EdgeComponentProps {
   fromNode: Node;
   toNode: Node;
   orientation: MapOrientation;
+  isSelected?: boolean;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const ARROW_LENGTH = 10;
 const CONTROL_OFFSET_RATIO = 0.55;
 const CONTROL_OFFSET_MIN = 50;
 
-function EdgeComponent({ fromNode, toNode, orientation }: EdgeComponentProps) {
+function EdgeComponent({
+  fromNode,
+  toNode,
+  orientation,
+  isSelected,
+  onClick,
+}: EdgeComponentProps) {
   let x1, y1, x2, y2, cp1x, cp1y, cp2x, cp2y;
 
   if (orientation === "left-right") {
@@ -61,13 +69,34 @@ function EdgeComponent({ fromNode, toNode, orientation }: EdgeComponentProps) {
   const path = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
 
   return (
-    <path
-      d={path}
-      stroke="#555"
-      strokeWidth="2"
-      fill="none"
-      markerEnd="url(#arrowhead)"
-    />
+    <g onClick={onClick} style={{ pointerEvents: "all", cursor: "pointer" }}>
+      {/* Hit area - invisible but clickable */}
+      <path
+        d={path}
+        stroke="transparent"
+        strokeWidth="4"
+        fill="none"
+      />
+      
+      {/* Selection highlight */}
+      {isSelected && (
+        <path
+          d={path}
+          stroke="rgba(0, 123, 255, 0.3)"
+          strokeWidth="4"
+          fill="none"
+        />
+      )}
+
+      {/* Visible edge */}
+      <path
+        d={path}
+        stroke="#555"
+        strokeWidth="2"
+        fill="none"
+        markerEnd="url(#arrowhead)"
+      />
+    </g>
   );
 }
 

@@ -11,6 +11,9 @@ export interface Node {
 export interface Edge {
   from: string;
   to: string;
+  label?: string;
+  color?: string;
+  isAnimated?: boolean;
 }
 
 export interface Viewport {

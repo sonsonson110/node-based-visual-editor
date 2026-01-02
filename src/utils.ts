@@ -1,5 +1,9 @@
 import { GRID_SIZE } from "./constants";
-import type { Viewport } from "./types";
+import type { Edge, Viewport } from "./types";
+
+export function getEdgeId(edge: Edge): string {
+  return `${edge.from}->${edge.to}`;
+}
 
 export function getRectCenter(
   x: number,

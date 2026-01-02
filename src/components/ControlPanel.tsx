@@ -8,6 +8,7 @@ import {
   selectMapOrientation,
   selectNodes,
   selectSelectedNodeIds,
+  selectSelectedEdgeIds,
   selectViewport,
   setEdges,
   setMapOrientation,
@@ -27,6 +28,7 @@ const ControlPanel: React.FC = () => {
   const edges = useSelector(selectEdges);
   const viewport = useSelector(selectViewport);
   const selectedNodeIds = useSelector(selectSelectedNodeIds);
+  const selectedEdgeIds = useSelector(selectSelectedEdgeIds);
   const selectedMapOrientation = useSelector(selectMapOrientation);
 
   const [newNodeId, setNewNodeId] = useState("");
@@ -127,6 +129,7 @@ const ControlPanel: React.FC = () => {
           onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
         />
         <button onClick={handleAddEdge}>Add Edge</button>
+        <span>Selected Edges: {selectedEdgeIds.length}</span>
       </InputGroup>
       <InputGroup>
         <span>Selected Nodes: {selectedNodeIds.length}</span>
