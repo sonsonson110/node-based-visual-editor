@@ -8,7 +8,12 @@ import {
   setSelectedEdgeIds,
   setSelectedNodeIds,
 } from "../store/editorSlice";
-import { getEdgeId, getEdgeMetrics, screenToWorld } from "../utils";
+import {
+  getBezierBounds,
+  getEdgeId,
+  getEdgeMetrics,
+  screenToWorld,
+} from "../utils";
 import type { SelectionBoxMeta } from "../types";
 
 interface UseSelectionBoxOptions {
@@ -93,11 +98,13 @@ export const useSelectionBox = ({
               mapOrientation
             );
 
-            // Calculate bounding box of the edge (approximate using control points)
-            const edgeMinX = Math.min(x1, x2, cp1x, cp2x);
-            const edgeMaxX = Math.max(x1, x2, cp1x, cp2x);
-            const edgeMinY = Math.min(y1, y2, cp1y, cp2y);
-            const edgeMaxY = Math.max(y1, y2, cp1y, cp2y);
+            // Calculate precise bounding box of the Bezier curve
+            const {
+              minX: edgeMinX,
+              maxX: edgeMaxX,
+              minY: edgeMinY,
+              maxY: edgeMaxY,
+            } = getBezierBounds(x1, y1, cp1x, cp1y, cp2x, cp2y, x2, y2);
 
             // Check if selection box fully contains the edge bounding box
             return (
