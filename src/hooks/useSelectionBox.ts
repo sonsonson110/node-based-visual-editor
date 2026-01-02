@@ -1,11 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from ".";
 import {
+  selectEdges,
+  selectMapOrientation,
   selectNodes,
   selectViewport,
+  setSelectedEdgeIds,
   setSelectedNodeIds,
 } from "../store/editorSlice";
-import { screenToWorld } from "../utils";
+import { getEdgeId, getEdgeMetrics, screenToWorld } from "../utils";
 import type { SelectionBoxMeta } from "../types";
 
 interface UseSelectionBoxOptions {
@@ -19,9 +22,16 @@ export const useSelectionBox = ({
 }: UseSelectionBoxOptions) => {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
+  const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
+  const mapOrientation = useAppSelector(selectMapOrientation);
   const [selectionBox, setSelectionBox] = useState<SelectionBoxMeta | null>(
     null
+  );
+
+  const nodeMap = useMemo(
+    () => new Map(nodes.map((node) => [node.id, node])),
+    [nodes]
   );
 
   // Selection box mouse logic
@@ -59,6 +69,7 @@ export const useSelectionBox = ({
         const yMin = Math.min(world1.y, world2.y);
         const yMax = Math.max(world1.y, world2.y);
 
+        // Select Nodes
         const insideNodeIds = nodes
           .filter(
             (node) =>
@@ -69,7 +80,37 @@ export const useSelectionBox = ({
           )
           .map((node) => node.id);
 
+        // Select Edges
+        const insideEdgeIds = edges
+          .filter((edge) => {
+            const fromNode = nodeMap.get(edge.from);
+            const toNode = nodeMap.get(edge.to);
+            if (!fromNode || !toNode) return false;
+
+            const { x1, y1, x2, y2, cp1x, cp1y, cp2x, cp2y } = getEdgeMetrics(
+              fromNode,
+              toNode,
+              mapOrientation
+            );
+
+            // Calculate bounding box of the edge (approximate using control points)
+            const edgeMinX = Math.min(x1, x2, cp1x, cp2x);
+            const edgeMaxX = Math.max(x1, x2, cp1x, cp2x);
+            const edgeMinY = Math.min(y1, y2, cp1y, cp2y);
+            const edgeMaxY = Math.max(y1, y2, cp1y, cp2y);
+
+            // Check if selection box fully contains the edge bounding box
+            return (
+              xMin <= edgeMinX &&
+              xMax >= edgeMaxX &&
+              yMin <= edgeMinY &&
+              yMax >= edgeMaxY
+            );
+          })
+          .map((edge) => getEdgeId(edge.from, edge.to));
+
         dispatch(setSelectedNodeIds(Array.from(new Set(insideNodeIds))));
+        dispatch(setSelectedEdgeIds(Array.from(new Set(insideEdgeIds))));
         setSelectionBox(null);
       }
 
@@ -81,7 +122,16 @@ export const useSelectionBox = ({
     return () => {
       document.removeEventListener("mousedown", handleMouseDown);
     };
-  }, [dispatch, draggedNodeId, isPanning, nodes, viewport]);
+  }, [
+    dispatch,
+    draggedNodeId,
+    isPanning,
+    nodes,
+    edges,
+    viewport,
+    mapOrientation,
+    nodeMap,
+  ]);
 
   return selectionBox;
 };

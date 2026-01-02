@@ -123,7 +123,7 @@ function App() {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
             if (!fromNode || !toNode) return null;
-            const edgeId = getEdgeId(edge);
+            const edgeId = getEdgeId(edge.from, edge.to);
 
             return (
               <EdgeComponent
