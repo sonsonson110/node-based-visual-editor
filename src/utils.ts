@@ -14,10 +14,9 @@ export function getRectCenter(
 }
 
 export function getRectCenterLeft(x: number, y: number, height: number) {
-  return {
-    cx: x,
-    cy: y + height / 2,
-  };
+  const cx = x;
+  const cy = y + height / 2;
+  return [cx, cy];
 }
 
 export function getRectCenterRight(
@@ -26,10 +25,9 @@ export function getRectCenterRight(
   width: number,
   height: number
 ) {
-  return {
-    cx: x + width,
-    cy: y + height / 2,
-  };
+  const cx = x + width;
+  const cy = y + height / 2;
+  return [cx, cy];
 }
 
 export function screenToWorld(
