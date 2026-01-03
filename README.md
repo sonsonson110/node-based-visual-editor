@@ -97,3 +97,17 @@ This requires several architectural updates:
 - **Visual Polish**:
   - Fine-tuned arrow sizes and positioning to ensure seamless connection with edge strokes.
   - Adjusted curve tension to prevent "disconnected" feelings when nodes are close or aligned.
+
+### Advanced Edge Interactions
+
+- **Precise Selection**: Implemented mathematical Bezier bounds (`getBezierBounds`) for accurate marquee selection and click detection on curved paths.
+- **Edge Properties**:
+  - **Custom Colors**: Added color picker support for individual edges.
+  - **Animation**: Implemented animated dashed lines to visualize flow, togglable via UI.
+- **Interactive Labels**:
+  - **Midpoint Positioning**: Labels stay centered on the Bezier curve.
+  - **Double-Click Editing**: Seamless inline text editing using `foreignObject` and auto-sizing textareas.
+  - **Text Wrapping**: HTML-based rendering allows labels to wrap and scale naturally.
+- **UI Refinements**:
+  - Organized Control Panel into clear sections (Nodes, Edges, Orientation).
+  - Fixed event bubbling issues to prevent accidental deselection when interacting with edges.
