@@ -1,11 +1,9 @@
 import { useEffect, type RefObject } from "react";
-import { useAppDispatch } from ".";
-import { setSelectedNodeIds } from "../store/editorSlice";
 import { useCanvasPan } from "./useCanvasPan";
 import { useCanvasZoom } from "./useCanvasZoom";
 import { useNodeDrag } from "./useNodeDrag";
-import { useSelectionBox } from "./useSelectionBox";
 import { useNodeResize } from "./useNodeResize";
+import { useSelectionBox } from "./useSelectionBox";
 
 interface MapInteractionOptions {
   worldContainerRef: RefObject<HTMLDivElement | null>;
@@ -14,15 +12,9 @@ interface MapInteractionOptions {
 export const useMapInteraction = ({
   worldContainerRef,
 }: MapInteractionOptions) => {
-  const dispatch = useAppDispatch();
+  const { draggedNodeId, handleNodeMouseDown } = useNodeDrag();
 
-  const { draggedNodeId, handleNodeMouseDown } = useNodeDrag({
-    worldContainerRef,
-  });
-
-  const { resizingNodeId, handleResizeMouseDown } = useNodeResize({
-    worldContainerRef,
-  });
+  const { resizingNodeId, handleResizeMouseDown } = useNodeResize();
 
   const isPanning = useCanvasPan({
     worldContainerRef,
@@ -42,23 +34,6 @@ export const useMapInteraction = ({
     window.addEventListener("contextmenu", handler);
     return () => window.removeEventListener("contextmenu", handler);
   }, []);
-
-  // Deselect all nodes on background left click
-  useEffect(() => {
-    const handleMouseDown = (e: MouseEvent) => {
-      if (
-        e.button === 0 &&
-        worldContainerRef.current &&
-        !worldContainerRef.current.contains(e.target as globalThis.Node)
-      ) {
-        dispatch(setSelectedNodeIds([]));
-      }
-    };
-    document.addEventListener("mousedown", handleMouseDown);
-    return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
-    };
-  }, [dispatch, worldContainerRef]);
 
   return {
     selectionBox,

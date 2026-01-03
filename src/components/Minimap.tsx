@@ -1,13 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants";
 import { useAppSelector, useMinimap } from "../hooks";
-import { selectSelectedNodeIds } from "../store/editorSlice";
-import { getRectCenter } from "../utils";
+import {
+  selectSelectedEdgeIds,
+  selectSelectedNodeIds,
+} from "../store/editorSlice";
+import { getEdgeId, getRectCenter } from "../utils";
 
 type MinimapProps = React.HTMLProps<HTMLDivElement>;
 
 function Minimap(props: MinimapProps) {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
+  const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
   const {
     minimapNodes,
     edges,
@@ -25,7 +29,12 @@ function Minimap(props: MinimapProps) {
     [selectedNodeIds]
   );
 
-  const renderMinimapNodes = () =>
+  const selectedEdgeIdSet = useMemo(
+    () => new Set(selectedEdgeIds),
+    [selectedEdgeIds]
+  );
+
+  const renderMinimapEdges = () =>
     edges.map((edge) => {
       const fromNode = minimapNodeMap.get(edge.from);
       const toNode = minimapNodeMap.get(edge.to);
@@ -43,6 +52,8 @@ function Minimap(props: MinimapProps) {
         toNode.miniWidth,
         toNode.miniHeight
       );
+      const edgeId = getEdgeId(edge.from, edge.to);
+      const isSelected = selectedEdgeIdSet.has(edgeId);
       return (
         <line
           key={`${edge.from}->${edge.to}`}
@@ -50,13 +61,13 @@ function Minimap(props: MinimapProps) {
           y1={fromPos.cy}
           x2={toPos.cx}
           y2={toPos.cy}
-          stroke="#999"
-          strokeWidth="1"
+          stroke={isSelected ? "#0000FF" : "#666"}
+          strokeWidth={isSelected ? 3 : 1}
         />
       );
     });
 
-  const renderMinimapEdges = () =>
+  const renderMinimapNodes = () =>
     minimapNodes.map((node) => {
       const isSelected = selectedNodeIdSet.has(node.id);
       return (
@@ -161,8 +172,8 @@ function Minimap(props: MinimapProps) {
           viewBox={`0 0 ${MINIMAP_WIDTH} ${MINIMAP_HEIGHT}`}
           style={{ display: "block" }}
         >
-          {renderMinimapNodes()}
           {renderMinimapEdges()}
+          {renderMinimapNodes()}
 
           <rect
             x={viewportIndicator.x}

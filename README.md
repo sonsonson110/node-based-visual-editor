@@ -85,3 +85,29 @@ This requires several architectural updates:
 - Added **Snap-to-Grid** support for resizing operations (hold `Alt` to disable).
 - Updated the Redux store to support dynamic `width` and `height` properties on nodes.
 - Refactored `EdgeComponent` to calculate connection points based on the node's center (dynamic width/height), ensuring edges stay attached correctly during resize operations.
+
+## Phase 10: Edge Styling & Map Orientation
+
+- **Curved Edges**: Replaced simple straight lines with smooth cubic Bezier curves for a more professional look.
+- **Directional Arrows**: Added arrowhead markers to edges to clearly indicate flow direction.
+- **Map Orientation Support**:
+  - Implemented "Top-Down" and "Left-Right" layout modes.
+  - Edges dynamically adjust their start/end points and curve control points based on the selected orientation.
+  - Added controls to the UI to switch between orientations.
+- **Visual Polish**:
+  - Fine-tuned arrow sizes and positioning to ensure seamless connection with edge strokes.
+  - Adjusted curve tension to prevent "disconnected" feelings when nodes are close or aligned.
+
+### Advanced Edge Interactions
+
+- **Precise Selection**: Implemented mathematical Bezier bounds (`getBezierBounds`) for accurate marquee selection and click detection on curved paths.
+- **Edge Properties**:
+  - **Custom Colors**: Added color picker support for individual edges.
+  - **Animation**: Implemented animated dashed lines to visualize flow, togglable via UI.
+- **Interactive Labels**:
+  - **Midpoint Positioning**: Labels stay centered on the Bezier curve.
+  - **Double-Click Editing**: Seamless inline text editing using `foreignObject` and auto-sizing textareas.
+  - **Text Wrapping**: HTML-based rendering allows labels to wrap and scale naturally.
+- **UI Refinements**:
+  - Organized Control Panel into clear sections (Nodes, Edges, Orientation).
+  - Fixed event bubbling issues to prevent accidental deselection when interacting with edges.

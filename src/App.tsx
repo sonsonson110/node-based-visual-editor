@@ -1,14 +1,21 @@
 import { useMemo, useRef } from "react";
 import ControlPanel from "./components/ControlPanel";
 import EdgeComponent from "./components/EdgeComponent";
+import Minimap from "./components/Minimap";
 import NodeComponent from "./components/NodeComponent";
 import SelectionBox from "./components/SelectionBox";
-import { useAppSelector, useMapInteraction } from "./hooks";
+import { GRID_SIZE } from "./constants";
+import { useAppDispatch, useAppSelector, useMapInteraction } from "./hooks";
 import {
   selectEdges,
+  selectMapOrientation,
   selectNodes,
+  selectSelectedEdgeIds,
   selectSelectedNodeIds,
   selectViewport,
+  setSelectedEdgeIds,
+  setSelectedNodeIds,
+  updateEdge,
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -16,14 +23,16 @@ import {
   SVGContainer,
   WorldContainer,
 } from "./styled";
-import { GRID_SIZE } from "./constants";
-import Minimap from "./components/Minimap";
+import { getEdgeId } from "./utils";
 
 function App() {
+  const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
   const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
+  const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
+  const mapOrientation = useAppSelector(selectMapOrientation);
 
   const worldContainerRef = useRef<HTMLDivElement>(null);
 
@@ -43,6 +52,11 @@ function App() {
     [selectedNodeIds]
   );
 
+  const selectedEdgeIdSet = useMemo(
+    () => new Set(selectedEdgeIds),
+    [selectedEdgeIds]
+  );
+
   const nodeMap = useMemo(
     () => new Map(nodes.map((node) => [node.id, node])),
     [nodes]
@@ -52,6 +66,23 @@ function App() {
     if (!draggedNodeId) return null;
     return nodeMap.get(draggedNodeId);
   }, [draggedNodeId, nodeMap]);
+
+  const handleEdgeClick = (e: React.MouseEvent, edgeId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.shiftKey) {
+      if (selectedEdgeIdSet.has(edgeId)) {
+        dispatch(
+          setSelectedEdgeIds(selectedEdgeIds.filter((id) => id !== edgeId))
+        );
+      } else {
+        dispatch(setSelectedEdgeIds([...selectedEdgeIds, edgeId]));
+      }
+    } else {
+      dispatch(setSelectedEdgeIds([edgeId]));
+      dispatch(setSelectedNodeIds([]));
+    }
+  };
 
   const bgSize = GRID_SIZE * viewport.zoom;
   const majorBgSize = bgSize * 4;
@@ -83,11 +114,28 @@ function App() {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
             if (!fromNode || !toNode) return null;
+            const edgeId = getEdgeId(edge.from, edge.to);
+
             return (
               <EdgeComponent
-                key={`${edge.from}->${edge.to}`}
+                key={edgeId}
                 fromNode={fromNode}
                 toNode={toNode}
+                orientation={mapOrientation}
+                isSelected={selectedEdgeIdSet.has(edgeId)}
+                onClick={(e) => handleEdgeClick(e, edgeId)}
+                color={edge.color}
+                isAnimated={edge.isAnimated}
+                label={edge.label}
+                onLabelChange={(newLabel) =>
+                  dispatch(
+                    updateEdge({
+                      from: edge.from,
+                      to: edge.to,
+                      label: newLabel,
+                    })
+                  )
+                }
               />
             );
           })}
@@ -101,6 +149,7 @@ function App() {
             onMouseDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();
+              e.stopPropagation();
               handleNodeMouseDown(e.pageX, e.pageY, node.id, e.shiftKey);
             }}
             onResizeMouseDown={(e) => handleResizeMouseDown(e, node.id)}
