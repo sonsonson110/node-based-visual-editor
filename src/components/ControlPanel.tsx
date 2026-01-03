@@ -1,26 +1,27 @@
 import React, { useMemo, useState } from "react";
-import { InputGroup, UIContainer } from "../styled";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  DEFAULT_NODE_HEIGHT,
+  DEFAULT_NODE_WIDTH,
+  MAP_ORIENTATIONS,
+} from "../constants";
 import {
   addEdge,
   addNode,
   selectEdges,
   selectMapOrientation,
   selectNodes,
-  selectSelectedNodeIds,
   selectSelectedEdgeIds,
+  selectSelectedNodeIds,
   selectViewport,
   setEdges,
   setMapOrientation,
   setNodes,
+  updateEdge,
 } from "../store/editorSlice";
-import { screenToWorld } from "../utils";
+import { InputGroup, UIContainer } from "../styled";
 import type { Node } from "../types";
-import {
-  DEFAULT_NODE_HEIGHT,
-  DEFAULT_NODE_WIDTH,
-  MAP_ORIENTATIONS,
-} from "../constants";
+import { screenToWorld } from "../utils";
 
 const ControlPanel: React.FC = () => {
   const dispatch = useDispatch();
@@ -102,12 +103,34 @@ const ControlPanel: React.FC = () => {
     dispatch(setEdges(remainingEdges));
   };
 
+  const selectedEdge = useMemo(
+    () =>
+      selectedEdgeIds.length > 0
+        ? edges.find((e) => `${e.from}->${e.to}` === selectedEdgeIds[0])
+        : undefined,
+    [edges, selectedEdgeIds]
+  );
+
+  const handleEdgeColorChange = (color: string) => {
+    selectedEdgeIds.forEach((edgeId) => {
+      const [from, to] = edgeId.split("->");
+      dispatch(updateEdge({ from, to, color }));
+    });
+  };
+
+  const handleEdgeAnimationChange = (isAnimated: boolean) => {
+    selectedEdgeIds.forEach((edgeId) => {
+      const [from, to] = edgeId.split("->");
+      dispatch(updateEdge({ from, to, isAnimated }));
+    });
+  };
+
   return (
     <UIContainer onMouseDown={(e) => e.stopPropagation()}>
       {/* Node Controls */}
       <InputGroup>
         <strong>Nodes</strong>
-        <div style={{ display: "flex", gap: "5px" }}>
+        <div style={{ display: "flex", gap: 5 }}>
           <input
             type="text"
             placeholder="New Node ID"
@@ -118,6 +141,7 @@ const ControlPanel: React.FC = () => {
           />
           <button onClick={handleAddNode}>Add</button>
         </div>
+
         <div
           style={{
             display: "flex",
@@ -146,7 +170,7 @@ const ControlPanel: React.FC = () => {
             placeholder="From"
             value={fromNode}
             onChange={(e) => setFromNode(e.target.value)}
-            style={{ width: "60px" }}
+            style={{ flex: 1 }}
           />
           <input
             type="text"
@@ -154,13 +178,41 @@ const ControlPanel: React.FC = () => {
             value={toNode}
             onChange={(e) => setToNode(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
-            style={{ width: "60px" }}
+            style={{ flex: 1 }}
           />
-          <button onClick={handleAddEdge} style={{ flex: 1 }}>
-            Add
-          </button>
+          <button onClick={handleAddEdge}>Add</button>
         </div>
         <span>Selected: {selectedEdgeIds.length}</span>
+        {selectedEdgeIds.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "5px",
+              marginTop: "5px",
+            }}
+          >
+            <strong>Style</strong>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <label>Color:</label>
+              <input
+                type="color"
+                value={selectedEdge?.color || "#555555"}
+                onChange={(e) => handleEdgeColorChange(e.target.value)}
+              />
+            </div>
+            <label
+              style={{ display: "flex", alignItems: "center", gap: "5px" }}
+            >
+              <input
+                type="checkbox"
+                checked={selectedEdge?.isAnimated || false}
+                onChange={(e) => handleEdgeAnimationChange(e.target.checked)}
+              />
+              Animated
+            </label>
+          </div>
+        )}
       </InputGroup>
 
       <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />

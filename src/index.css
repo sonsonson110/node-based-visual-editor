@@ -7,3 +7,9 @@ body {
 body {
   margin: 0;
 }
+
+input,
+button {
+  min-width: 0;
+}
+

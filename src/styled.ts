@@ -1,4 +1,4 @@
-import styled, { css } from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 
 export const RootContainer = styled.div`
   width: 100vw;
@@ -14,6 +14,7 @@ export const RootContainer = styled.div`
 
 export const UIContainer = styled.div`
   position: absolute;
+  width: 180px;
   top: 10px;
   left: 10px;
   z-index: 10;
@@ -108,4 +109,21 @@ export const NodeResizingIndicator = styled.div`
   pointer-events: none;
   font-size: 10px;
   margin-top: 4px;
+`;
+
+const dashAnimation = keyframes`
+  to {
+    stroke-dashoffset: -10;
+  }
+`;
+
+export const EdgeVisblePath = styled.path<{
+  $isAnimated: boolean;
+}>`
+  ${({ $isAnimated }) =>
+    $isAnimated &&
+    css`
+      stroke-dasharray: 5, 5;
+      animation: ${dashAnimation} 0.5s linear infinite;
+    `}
 `;

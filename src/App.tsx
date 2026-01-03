@@ -15,6 +15,7 @@ import {
   selectViewport,
   setSelectedEdgeIds,
   setSelectedNodeIds,
+  updateEdge,
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -124,6 +125,17 @@ function App() {
                 isSelected={selectedEdgeIdSet.has(edgeId)}
                 onClick={(e) => handleEdgeClick(e, edgeId)}
                 color={edge.color}
+                isAnimated={edge.isAnimated}
+                label={edge.label}
+                onLabelChange={(newLabel) =>
+                  dispatch(
+                    updateEdge({
+                      from: edge.from,
+                      to: edge.to,
+                      label: newLabel,
+                    })
+                  )
+                }
               />
             );
           })}

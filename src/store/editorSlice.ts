@@ -62,6 +62,14 @@ export const editorSlice = createSlice({
     setSelectedEdgeIds: (state, action: PayloadAction<Array<string>>) => {
       state.selectedEdgeIds = action.payload;
     },
+    updateEdge: (state, action: PayloadAction<Edge>) => {
+      const index = state.edges.findIndex(
+        (e) => e.from === action.payload.from && e.to === action.payload.to
+      );
+      if (index !== -1) {
+        state.edges[index] = { ...state.edges[index], ...action.payload };
+      }
+    },
     setViewport: (state, action: PayloadAction<Partial<Viewport>>) => {
       state.viewport = { ...state.viewport, ...action.payload };
     },
@@ -77,6 +85,7 @@ export const {
   addEdge,
   setSelectedNodeIds,
   setSelectedEdgeIds,
+  updateEdge,
   setViewport,
   setEdges,
   setMapOrientation,
