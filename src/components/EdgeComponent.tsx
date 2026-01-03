@@ -26,7 +26,7 @@ function EdgeComponent({
   isAnimated = false,
   onLabelChange,
 }: EdgeComponentProps) {
-  const { path, x2, y2, x1, y1, cp1x, cp1y, cp2x, cp2y } = getEdgeMetrics(
+  const { path, x2, y2, midX, midY } = getEdgeMetrics(
     fromNode,
     toNode,
     orientation
@@ -34,11 +34,10 @@ function EdgeComponent({
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedLabel, setEditedLabel] = useState(label || "");
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
-      inputRef.current.focus();
       inputRef.current.select();
     }
   }, [isEditing]);
@@ -51,13 +50,14 @@ function EdgeComponent({
 
   const handleBlur = () => {
     setIsEditing(false);
-    if (editedLabel !== label) {
-      onLabelChange?.(editedLabel);
+    if (editedLabel.trim() !== label) {
+      onLabelChange?.(editedLabel.trim());
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleBlur();
     }
     if (e.key === "Escape") {
@@ -65,12 +65,6 @@ function EdgeComponent({
       setEditedLabel(label || "");
     }
   };
-
-  // Calculate midpoint for cubic bezier: B(0.5)
-  // B(t) = (1-t)^3 P0 + 3(1-t)^2 t P1 + 3(1-t) t^2 P2 + t^3 P3
-  // t = 0.5 => coefficients are 0.125, 0.375, 0.375, 0.125
-  const midX = 0.125 * (x1 + x2) + 0.375 * (cp1x + cp2x);
-  const midY = 0.125 * (y1 + y2) + 0.375 * (cp1y + cp2y);
 
   const angle = orientation === "left-right" ? 0 : 90;
   const edgeColor = color || "#555";
@@ -124,55 +118,81 @@ function EdgeComponent({
 
       {/* Label Display */}
       {!isEditing && label && (
-        <g transform={`translate(${midX}, ${midY})`}>
-          <rect
-            x="-30"
-            y="-10"
-            width="60"
-            height="20"
-            fill="white"
-            opacity="0.8"
-            rx="4"
-          />
-          <text
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontSize="12"
-            fill={edgeColor}
-            style={{ pointerEvents: "none", userSelect: "none" }}
-            dy="1"
+        <foreignObject
+          x={midX - 75}
+          y={midY - 50}
+          width="150"
+          height="100"
+          style={{ overflow: "visible", pointerEvents: "none" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+              width: "100%",
+            }}
           >
-            {label}
-          </text>
-        </g>
+            <div
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                maxWidth: "150px",
+                wordWrap: "break-word",
+                textAlign: "center",
+                fontSize: "12px",
+                color: edgeColor,
+                userSelect: "none",
+                pointerEvents: "all",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+              }}
+            >
+              {label}
+            </div>
+          </div>
+        </foreignObject>
       )}
 
       {/* Editing Input */}
       {isEditing && (
         <foreignObject
-          x={midX - 40}
-          y={midY - 12}
-          width="80"
-          height="24"
+          x={midX - 75}
+          y={midY - 50}
+          width="150"
+          height="100"
           style={{ overflow: "visible" }}
+          onMouseDown={(e) => e.stopPropagation()}
         >
-          <input
-            ref={inputRef}
-            value={editedLabel}
-            onChange={(e) => setEditedLabel(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
+          <div
             style={{
-              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
               height: "100%",
-              border: "1px solid #007bff",
-              borderRadius: "4px",
-              fontSize: "12px",
-              textAlign: "center",
-              outline: "none",
-              background: "white",
+              width: "100%",
             }}
-          />
+          >
+            <textarea
+              ref={inputRef}
+              rows={1}
+              value={editedLabel}
+              onChange={(e) => setEditedLabel(e.target.value)}
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              style={{
+                fieldSizing: "content",
+                pointerEvents: "all",
+                backgroundColor: "rgba(255, 255, 255, 0.9)",
+                textAlign: "center",
+                fontSize: "12px",
+                color: edgeColor,
+                outline: "none",
+                resize: "none",
+                overflow: "hidden",
+                fontFamily: "inherit",
+              }}
+            />
+          </div>
         </foreignObject>
       )}
     </g>

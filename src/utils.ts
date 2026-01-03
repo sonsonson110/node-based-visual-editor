@@ -62,6 +62,12 @@ export function getEdgeMetrics(
 
   const path = `M ${x1} ${y1} C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x2} ${y2}`;
 
+  // Calculate midpoint for cubic bezier: B(0.5)
+  // B(t) = (1-t)^3 P0 + 3(1-t)^2 t P1 + 3(1-t) t^2 P2 + t^3 P3
+  // t = 0.5 => coefficients are 0.125, 0.375, 0.375, 0.125
+  const midX = 0.125 * (x1 + x2) + 0.375 * (cp1x + cp2x);
+  const midY = 0.125 * (y1 + y2) + 0.375 * (cp1y + cp2y);
+
   return {
     x1,
     y1,
@@ -71,6 +77,8 @@ export function getEdgeMetrics(
     cp1y,
     cp2x,
     cp2y,
+    midX,
+    midY,
     path,
   };
 }
