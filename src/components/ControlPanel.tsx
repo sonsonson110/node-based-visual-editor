@@ -17,6 +17,8 @@ import {
   setEdges,
   setMapOrientation,
   setNodes,
+  setSelectedEdgeIds,
+  setSelectedNodeIds,
   updateEdge,
 } from "../store/editorSlice";
 import { InputGroup, UIContainer } from "../styled";
@@ -152,7 +154,9 @@ const ControlPanel: React.FC = () => {
         !selectedNodeIdSet.has(edge.from) && !selectedNodeIdSet.has(edge.to)
     );
     dispatch(setNodes(remainingNodes));
+    dispatch(setSelectedNodeIds([]));
     dispatch(setEdges(remainingEdges));
+    dispatch(setSelectedEdgeIds([]));
   };
 
   const handleEdgeColorChange = (color: string) => {
@@ -167,6 +171,14 @@ const ControlPanel: React.FC = () => {
       const [from, to] = edgeId.split("->");
       dispatch(updateEdge({ from, to, isAnimated }));
     });
+  };
+
+  const handleRemoveSelectedEdges = () => {
+    const remainingEdges = edges.filter(
+      (edge) => !selectedEdgeIds.includes(getEdgeId(edge.from, edge.to))
+    );
+    dispatch(setEdges(remainingEdges));
+    dispatch(setSelectedEdgeIds([]));
   };
 
   return (
@@ -226,7 +238,15 @@ const ControlPanel: React.FC = () => {
           />
           <button onClick={handleAddEdge}>Add</button>
         </div>
-        <span>Selected: {selectedEdgeIds.length}</span>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <span>Selected: {selectedEdgeIds.length}</span>
+          <button
+            onClick={handleRemoveSelectedEdges}
+            disabled={selectedEdgeIds.length === 0}
+          >
+            Remove
+          </button>
+        </div>
         {selectedEdgeIds.length > 0 && (
           <div
             style={{
