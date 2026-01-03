@@ -21,7 +21,7 @@ import {
 } from "../store/editorSlice";
 import { InputGroup, UIContainer } from "../styled";
 import type { Node } from "../types";
-import { screenToWorld } from "../utils";
+import { getEdgeId, screenToWorld } from "../utils";
 
 const ControlPanel: React.FC = () => {
   const dispatch = useDispatch();
@@ -41,10 +41,62 @@ const ControlPanel: React.FC = () => {
     [nodes]
   );
 
+  const edgeMap = useMemo(
+    () => new Map(edges.map((edge) => [getEdgeId(edge.from, edge.to), edge])),
+    [edges]
+  );
+
   const selectedNodeIdSet = useMemo(
     () => new Set(selectedNodeIds),
     [selectedNodeIds]
   );
+
+  const selectedEdge = useMemo(
+    () =>
+      selectedEdgeIds.length > 0
+        ? edges.find((e) => `${e.from}->${e.to}` === selectedEdgeIds[0])
+        : undefined,
+    [edges, selectedEdgeIds]
+  );
+
+  const displayingEdgeStyle = useMemo(() => {
+    const defaultStyle = { color: "#555555", isAnimated: false };
+
+    // Early return for no selection or missing selectedEdge
+    if (selectedEdgeIds.length === 0 || !selectedEdge) {
+      return defaultStyle;
+    }
+
+    const normalizedStyle = {
+      color: selectedEdge.color ?? defaultStyle.color,
+      isAnimated: selectedEdge.isAnimated ?? defaultStyle.isAnimated,
+    };
+
+    if (selectedEdgeIds.length === 1) {
+      return normalizedStyle;
+    }
+
+    // Check if all selected edges share the same style
+    const allMatchColor = selectedEdgeIds.every((edgeId) => {
+      const edge = edgeMap.get(edgeId);
+      return (edge?.color ?? defaultStyle.color) === normalizedStyle.color;
+    });
+
+    const allMatchAnimation = selectedEdgeIds.every((edgeId) => {
+      const edge = edgeMap.get(edgeId);
+      return (
+        (edge?.isAnimated ?? defaultStyle.isAnimated) ===
+        normalizedStyle.isAnimated
+      );
+    });
+
+    return {
+      color: allMatchColor ? normalizedStyle.color : defaultStyle.color,
+      isAnimated: allMatchAnimation
+        ? normalizedStyle.isAnimated
+        : defaultStyle.isAnimated,
+    };
+  }, [edgeMap, selectedEdge, selectedEdgeIds]);
 
   const handleAddNode = () => {
     if (!newNodeId.trim()) {
@@ -102,14 +154,6 @@ const ControlPanel: React.FC = () => {
     dispatch(setNodes(remainingNodes));
     dispatch(setEdges(remainingEdges));
   };
-
-  const selectedEdge = useMemo(
-    () =>
-      selectedEdgeIds.length > 0
-        ? edges.find((e) => `${e.from}->${e.to}` === selectedEdgeIds[0])
-        : undefined,
-    [edges, selectedEdgeIds]
-  );
 
   const handleEdgeColorChange = (color: string) => {
     selectedEdgeIds.forEach((edgeId) => {
@@ -197,7 +241,7 @@ const ControlPanel: React.FC = () => {
               <label>Color:</label>
               <input
                 type="color"
-                value={selectedEdge?.color || "#555555"}
+                value={displayingEdgeStyle.color}
                 onChange={(e) => handleEdgeColorChange(e.target.value)}
               />
             </div>
@@ -206,7 +250,7 @@ const ControlPanel: React.FC = () => {
             >
               <input
                 type="checkbox"
-                checked={selectedEdge?.isAnimated || false}
+                checked={displayingEdgeStyle.isAnimated}
                 onChange={(e) => handleEdgeAnimationChange(e.target.checked)}
               />
               Animated
