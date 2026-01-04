@@ -12,5 +12,5 @@ export const MINIMUM_NODE_SIZE = 40;
 export const MAP_ORIENTATIONS = ["top-down", "left-right"] as const;
 
 export const ARROW_LENGTH = 10;
-export const CONTROL_OFFSET_RATIO = 0.55;
-export const CONTROL_OFFSET_MIN = 50;
+export const CONTROL_OFFSET_RATIO = 0.5;
+export const CONTROL_OFFSET_MIN = 20;
