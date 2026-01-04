@@ -4,7 +4,7 @@ import {
   DEFAULT_NODE_HEIGHT,
   DEFAULT_NODE_WIDTH,
   MAP_ORIENTATIONS,
-} from "../constants";
+} from "../../constants";
 import {
   addEdge,
   addNode,
@@ -20,10 +20,24 @@ import {
   setSelectedEdgeIds,
   setSelectedNodeIds,
   updateEdge,
-} from "../store/editorSlice";
-import { InputGroup, UIContainer } from "../styled";
-import type { Node } from "../types";
-import { getEdgeId, screenToWorld } from "../utils";
+} from "../../store/editorSlice";
+import type { Node } from "../../types";
+import { getEdgeId, screenToWorld } from "../../utils";
+import {
+  CheckboxLabel,
+  ColorLabel,
+  Divider,
+  HeaderRow,
+  InputGroup,
+  OrientationGroup,
+  PanelContainer,
+  PanelContent,
+  PanelHeader,
+  RadioLabel,
+  RadioSpan,
+  Row,
+  StyleRow,
+} from "./styled";
 
 const ControlPanel: React.FC = () => {
   const dispatch = useDispatch();
@@ -184,42 +198,20 @@ const ControlPanel: React.FC = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        position: "absolute",
-        width: 180,
-        top: 10,
-        left: 10,
-        zIndex: 10,
-      }}
-      onMouseDown={(e) => e.stopPropagation()}
-    >
-      <div
-        style={{
-          background: "rgba(255, 255, 255, 0.8)",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          cursor: "pointer",
-          border: "1px solid black",
-          borderBottom: isMinimized ? "1px solid black" : "none",
-          padding: 8,
-          gap: 4,
-          userSelect: "none",
-        }}
+    <PanelContainer onMouseDown={(e) => e.stopPropagation()}>
+      <PanelHeader
+        $isMinimized={isMinimized}
         onClick={() => setIsMinimized(!isMinimized)}
       >
         <strong>Control Panel</strong>
         <span>{isMinimized ? "▼" : "▲"}</span>
-      </div>
+      </PanelHeader>
       {!isMinimized && (
-        <UIContainer>
+        <PanelContent>
           {/* Node Controls */}
           <InputGroup>
             <strong>Nodes</strong>
-            <div style={{ display: "flex", gap: 5 }}>
+            <Row>
               <input
                 type="text"
                 placeholder="New Node ID"
@@ -229,15 +221,9 @@ const ControlPanel: React.FC = () => {
                 style={{ flex: 1 }}
               />
               <button onClick={handleAddNode}>Add</button>
-            </div>
+            </Row>
 
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
+            <HeaderRow>
               <span>Selected: {selectedNodeIds.length}</span>
               <button
                 onClick={handleRemoveSelectedNodes}
@@ -245,15 +231,15 @@ const ControlPanel: React.FC = () => {
               >
                 Remove
               </button>
-            </div>
+            </HeaderRow>
           </InputGroup>
 
-          <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
+          <Divider />
 
           {/* Edge Controls */}
           <InputGroup>
             <strong>Edges</strong>
-            <div style={{ display: "flex", gap: "5px" }}>
+            <Row>
               <input
                 type="text"
                 placeholder="From"
@@ -270,8 +256,8 @@ const ControlPanel: React.FC = () => {
                 style={{ flex: 1 }}
               />
               <button onClick={handleAddEdge}>Add</button>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
+            </Row>
+            <HeaderRow>
               <span>Selected: {selectedEdgeIds.length}</span>
               <button
                 onClick={handleRemoveSelectedEdges}
@@ -279,30 +265,19 @@ const ControlPanel: React.FC = () => {
               >
                 Remove
               </button>
-            </div>
+            </HeaderRow>
             {selectedEdgeIds.length > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "5px",
-                  marginTop: "5px",
-                }}
-              >
+              <StyleRow>
                 <strong>Style</strong>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
+                <ColorLabel>
                   <label>Color:</label>
                   <input
                     type="color"
                     value={displayingEdgeStyle.color}
                     onChange={(e) => handleEdgeColorChange(e.target.value)}
                   />
-                </div>
-                <label
-                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
-                >
+                </ColorLabel>
+                <CheckboxLabel>
                   <input
                     type="checkbox"
                     checked={displayingEdgeStyle.isAnimated}
@@ -311,28 +286,19 @@ const ControlPanel: React.FC = () => {
                     }
                   />
                   Animated
-                </label>
-              </div>
+                </CheckboxLabel>
+              </StyleRow>
             )}
           </InputGroup>
 
-          <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
+          <Divider />
 
           {/* Orientation Controls */}
           <InputGroup>
             <strong>Orientation</strong>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
-            >
+            <OrientationGroup>
               {MAP_ORIENTATIONS.map((orientation) => (
-                <label
-                  key={orientation}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    cursor: "pointer",
-                  }}
-                >
+                <RadioLabel key={orientation}>
                   <input
                     type="radio"
                     name="mapOrientation"
@@ -340,14 +306,14 @@ const ControlPanel: React.FC = () => {
                     checked={selectedMapOrientation === orientation}
                     onChange={() => dispatch(setMapOrientation(orientation))}
                   />
-                  <span style={{ marginLeft: "4px" }}>{orientation}</span>
-                </label>
+                  <RadioSpan>{orientation}</RadioSpan>
+                </RadioLabel>
               ))}
-            </div>
+            </OrientationGroup>
           </InputGroup>
-        </UIContainer>
+        </PanelContent>
       )}
-    </div>
+    </PanelContainer>
   );
 };
 

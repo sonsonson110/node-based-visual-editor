@@ -12,22 +12,6 @@ export const RootContainer = styled.div`
     linear-gradient(90deg, #ccc 1px, transparent 1px);
 `;
 
-export const UIContainer = styled.div`
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid black;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  user-select: none;
-`;
-
-export const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-`;
-
 export const PositionDisplay = styled.div`
   position: absolute;
   bottom: 10px;

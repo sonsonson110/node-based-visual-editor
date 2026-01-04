@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants";
-import { useAppSelector, useMinimap } from "../hooks";
+import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../../constants";
+import { useAppSelector, useMinimap } from "../../hooks";
 import {
   selectSelectedEdgeIds,
   selectSelectedNodeIds,
-} from "../store/editorSlice";
-import { getEdgeId, getRectCenter } from "../utils";
+} from "../../store/editorSlice";
+import { getEdgeId, getRectCenter } from "../../utils";
+import { MapWrapper, MinimapContainer, ToggleTab } from "./styled";
 
 function Minimap() {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
@@ -152,28 +153,9 @@ function Minimap() {
   }, [isDragging, dragOffset, updateViewportFromMinimap]);
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: 16,
-        right: 16,
-        display: "flex",
-        alignItems: "flex-end",
-      }}
-    >
+    <MinimapContainer>
       {!isMinimized && (
-        <div
-          style={{
-            width: MINIMAP_WIDTH,
-            height: MINIMAP_HEIGHT,
-            border: "1px solid black",
-            background: "rgba(255, 255, 255, 0.8)",
-            overflow: "hidden",
-            userSelect: "none",
-          }}
-          onMouseDown={handleMouseDown}
-          ref={containerRef}
-        >
+        <MapWrapper onMouseDown={handleMouseDown} ref={containerRef}>
           <svg
             width="100%"
             height="100%"
@@ -193,28 +175,16 @@ function Minimap() {
               fillOpacity={0.1}
             />
           </svg>
-        </div>
+        </MapWrapper>
       )}
-      <div
+      <ToggleTab
+        $isMinimized={isMinimized}
         onClick={() => setIsMinimized(!isMinimized)}
-        style={{
-          writingMode: "vertical-rl",
-          textOrientation: "mixed",
-          cursor: "pointer",
-          background: "rgba(255, 255, 255, 0.8)",
-          border: "1px solid black",
-          borderLeft: isMinimized ? "1px solid black" : "none",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          userSelect: "none",
-          padding: "4px",
-        }}
       >
         <strong>Minimap</strong>
         <span>{isMinimized ? "◀" : "▶"}</span>
-      </div>
-    </div>
+      </ToggleTab>
+    </MinimapContainer>
   );
 }
 
