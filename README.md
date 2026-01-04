@@ -111,3 +111,8 @@ This requires several architectural updates:
 - **UI Refinements**:
   - Organized Control Panel into clear sections (Nodes, Edges, Orientation).
   - Fixed event bubbling issues to prevent accidental deselection when interacting with edges.
+
+## Phase 11: Node Content and Styling Enhancements
+
+- **Rich Content Support**: Nodes can now contain complex HTML content, including text, images, and interactive elements. Use `Quilljs` package for rich text editing
+- **Dynamic State**: Add active and disabled states to nodes with distinct visual styles.
