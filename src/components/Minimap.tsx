@@ -7,9 +7,7 @@ import {
 } from "../store/editorSlice";
 import { getEdgeId, getRectCenter } from "../utils";
 
-type MinimapProps = React.HTMLProps<HTMLDivElement>;
-
-function Minimap(props: MinimapProps) {
+function Minimap() {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
   const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
   const {
@@ -22,6 +20,7 @@ function Minimap(props: MinimapProps) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   const selectedNodeIdSet = useMemo(
@@ -153,38 +152,67 @@ function Minimap(props: MinimapProps) {
   }, [isDragging, dragOffset, updateViewportFromMinimap]);
 
   return (
-    <div {...props}>
-      <div
-        style={{
-          width: MINIMAP_WIDTH,
-          height: MINIMAP_HEIGHT,
-          border: "1px solid black",
-          background: "rgba(255, 255, 255, 0.8)",
-          overflow: "hidden",
-          userSelect: "none",
-        }}
-        onMouseDown={handleMouseDown}
-        ref={containerRef}
-      >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${MINIMAP_WIDTH} ${MINIMAP_HEIGHT}`}
-          style={{ display: "block" }}
+    <div
+      style={{
+        position: "absolute",
+        bottom: 16,
+        right: 16,
+        display: "flex",
+        alignItems: "flex-end",
+      }}
+    >
+      {!isMinimized && (
+        <div
+          style={{
+            width: MINIMAP_WIDTH,
+            height: MINIMAP_HEIGHT,
+            border: "1px solid black",
+            background: "rgba(255, 255, 255, 0.8)",
+            overflow: "hidden",
+            userSelect: "none",
+          }}
+          onMouseDown={handleMouseDown}
+          ref={containerRef}
         >
-          {renderMinimapEdges()}
-          {renderMinimapNodes()}
+          <svg
+            width="100%"
+            height="100%"
+            viewBox={`0 0 ${MINIMAP_WIDTH} ${MINIMAP_HEIGHT}`}
+            style={{ display: "block" }}
+          >
+            {renderMinimapEdges()}
+            {renderMinimapNodes()}
 
-          <rect
-            x={viewportIndicator.x}
-            y={viewportIndicator.y}
-            width={viewportIndicator.width}
-            height={viewportIndicator.height}
-            stroke="#e24a4a"
-            fill="#e24a4a"
-            fillOpacity={0.1}
-          />
-        </svg>
+            <rect
+              x={viewportIndicator.x}
+              y={viewportIndicator.y}
+              width={viewportIndicator.width}
+              height={viewportIndicator.height}
+              stroke="#e24a4a"
+              fill="#e24a4a"
+              fillOpacity={0.1}
+            />
+          </svg>
+        </div>
+      )}
+      <div
+        onClick={() => setIsMinimized(!isMinimized)}
+        style={{
+          writingMode: "vertical-rl",
+          textOrientation: "mixed",
+          cursor: "pointer",
+          background: "rgba(255, 255, 255, 0.8)",
+          border: "1px solid black",
+          borderLeft: isMinimized ? "1px solid black" : "none",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          userSelect: "none",
+          padding: "4px",
+        }}
+      >
+        <strong>Minimap</strong>
+        <span>{isMinimized ? "◀" : "▶"}</span>
       </div>
     </div>
   );

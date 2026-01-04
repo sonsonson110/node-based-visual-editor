@@ -34,6 +34,8 @@ const ControlPanel: React.FC = () => {
   const selectedEdgeIds = useSelector(selectSelectedEdgeIds);
   const selectedMapOrientation = useSelector(selectMapOrientation);
 
+  const [isMinimized, setIsMinimized] = useState(false);
+
   const [newNodeId, setNewNodeId] = useState("");
   const [fromNode, setFromNode] = useState("");
   const [toNode, setToNode] = useState("");
@@ -182,131 +184,170 @@ const ControlPanel: React.FC = () => {
   };
 
   return (
-    <UIContainer onMouseDown={(e) => e.stopPropagation()}>
-      {/* Node Controls */}
-      <InputGroup>
-        <strong>Nodes</strong>
-        <div style={{ display: "flex", gap: 5 }}>
-          <input
-            type="text"
-            placeholder="New Node ID"
-            value={newNodeId}
-            onChange={(e) => setNewNodeId(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddNode()}
-            style={{ flex: 1 }}
-          />
-          <button onClick={handleAddNode}>Add</button>
-        </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <span>Selected: {selectedNodeIds.length}</span>
-          <button
-            onClick={handleRemoveSelectedNodes}
-            disabled={selectedNodeIds.length === 0}
-          >
-            Remove
-          </button>
-        </div>
-      </InputGroup>
-
-      <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
-
-      {/* Edge Controls */}
-      <InputGroup>
-        <strong>Edges</strong>
-        <div style={{ display: "flex", gap: "5px" }}>
-          <input
-            type="text"
-            placeholder="From"
-            value={fromNode}
-            onChange={(e) => setFromNode(e.target.value)}
-            style={{ flex: 1 }}
-          />
-          <input
-            type="text"
-            placeholder="To"
-            value={toNode}
-            onChange={(e) => setToNode(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
-            style={{ flex: 1 }}
-          />
-          <button onClick={handleAddEdge}>Add</button>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span>Selected: {selectedEdgeIds.length}</span>
-          <button
-            onClick={handleRemoveSelectedEdges}
-            disabled={selectedEdgeIds.length === 0}
-          >
-            Remove
-          </button>
-        </div>
-        {selectedEdgeIds.length > 0 && (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "5px",
-              marginTop: "5px",
-            }}
-          >
-            <strong>Style</strong>
-            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <label>Color:</label>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        position: "absolute",
+        width: 180,
+        top: 10,
+        left: 10,
+        zIndex: 10,
+      }}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
+      <div
+        style={{
+          background: "rgba(255, 255, 255, 0.8)",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          cursor: "pointer",
+          border: "1px solid black",
+          borderBottom: isMinimized ? "1px solid black" : "none",
+          padding: 8,
+          gap: 4,
+          userSelect: "none",
+        }}
+        onClick={() => setIsMinimized(!isMinimized)}
+      >
+        <strong>Control Panel</strong>
+        <span>{isMinimized ? "▼" : "▲"}</span>
+      </div>
+      {!isMinimized && (
+        <UIContainer>
+          {/* Node Controls */}
+          <InputGroup>
+            <strong>Nodes</strong>
+            <div style={{ display: "flex", gap: 5 }}>
               <input
-                type="color"
-                value={displayingEdgeStyle.color}
-                onChange={(e) => handleEdgeColorChange(e.target.value)}
+                type="text"
+                placeholder="New Node ID"
+                value={newNodeId}
+                onChange={(e) => setNewNodeId(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddNode()}
+                style={{ flex: 1 }}
               />
+              <button onClick={handleAddNode}>Add</button>
             </div>
-            <label
-              style={{ display: "flex", alignItems: "center", gap: "5px" }}
-            >
-              <input
-                type="checkbox"
-                checked={displayingEdgeStyle.isAnimated}
-                onChange={(e) => handleEdgeAnimationChange(e.target.checked)}
-              />
-              Animated
-            </label>
-          </div>
-        )}
-      </InputGroup>
 
-      <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
-
-      {/* Orientation Controls */}
-      <InputGroup>
-        <strong>Orientation</strong>
-        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-          {MAP_ORIENTATIONS.map((orientation) => (
-            <label
-              key={orientation}
+            <div
               style={{
                 display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
-                cursor: "pointer",
               }}
             >
+              <span>Selected: {selectedNodeIds.length}</span>
+              <button
+                onClick={handleRemoveSelectedNodes}
+                disabled={selectedNodeIds.length === 0}
+              >
+                Remove
+              </button>
+            </div>
+          </InputGroup>
+
+          <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
+
+          {/* Edge Controls */}
+          <InputGroup>
+            <strong>Edges</strong>
+            <div style={{ display: "flex", gap: "5px" }}>
               <input
-                type="radio"
-                name="mapOrientation"
-                value={orientation}
-                checked={selectedMapOrientation === orientation}
-                onChange={() => dispatch(setMapOrientation(orientation))}
+                type="text"
+                placeholder="From"
+                value={fromNode}
+                onChange={(e) => setFromNode(e.target.value)}
+                style={{ flex: 1 }}
               />
-              <span style={{ marginLeft: "4px" }}>{orientation}</span>
-            </label>
-          ))}
-        </div>
-      </InputGroup>
-    </UIContainer>
+              <input
+                type="text"
+                placeholder="To"
+                value={toNode}
+                onChange={(e) => setToNode(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddEdge()}
+                style={{ flex: 1 }}
+              />
+              <button onClick={handleAddEdge}>Add</button>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Selected: {selectedEdgeIds.length}</span>
+              <button
+                onClick={handleRemoveSelectedEdges}
+                disabled={selectedEdgeIds.length === 0}
+              >
+                Remove
+              </button>
+            </div>
+            {selectedEdgeIds.length > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                  marginTop: "5px",
+                }}
+              >
+                <strong>Style</strong>
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <label>Color:</label>
+                  <input
+                    type="color"
+                    value={displayingEdgeStyle.color}
+                    onChange={(e) => handleEdgeColorChange(e.target.value)}
+                  />
+                </div>
+                <label
+                  style={{ display: "flex", alignItems: "center", gap: "5px" }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={displayingEdgeStyle.isAnimated}
+                    onChange={(e) =>
+                      handleEdgeAnimationChange(e.target.checked)
+                    }
+                  />
+                  Animated
+                </label>
+              </div>
+            )}
+          </InputGroup>
+
+          <hr style={{ width: "100%", border: "1px solid #ddd", margin: 0 }} />
+
+          {/* Orientation Controls */}
+          <InputGroup>
+            <strong>Orientation</strong>
+            <div
+              style={{ display: "flex", flexDirection: "column", gap: "4px" }}
+            >
+              {MAP_ORIENTATIONS.map((orientation) => (
+                <label
+                  key={orientation}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                  }}
+                >
+                  <input
+                    type="radio"
+                    name="mapOrientation"
+                    value={orientation}
+                    checked={selectedMapOrientation === orientation}
+                    onChange={() => dispatch(setMapOrientation(orientation))}
+                  />
+                  <span style={{ marginLeft: "4px" }}>{orientation}</span>
+                </label>
+              ))}
+            </div>
+          </InputGroup>
+        </UIContainer>
+      )}
+    </div>
   );
 };
 

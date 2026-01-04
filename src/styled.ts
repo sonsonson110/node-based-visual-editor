@@ -13,17 +13,12 @@ export const RootContainer = styled.div`
 `;
 
 export const UIContainer = styled.div`
-  position: absolute;
-  width: 180px;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
   background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 5px;
+  border: 1px solid black;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
   user-select: none;
 `;
 
@@ -78,7 +73,6 @@ export const NodeContainer = styled.div<{
   `}
   position: absolute;
   background: white;
-  border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   user-select: none;
   display: flex;
@@ -94,7 +88,6 @@ export const ResizeHandle = styled.div`
   height: 8px;
   cursor: nwse-resize;
   background: linear-gradient(135deg, transparent 50%, #007bff 50%);
-  border-bottom-right-radius: 2px;
 `;
 
 export const NodeResizingIndicator = styled.div`
