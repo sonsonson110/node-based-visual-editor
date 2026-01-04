@@ -5,8 +5,8 @@ export const PanelContainer = styled.div`
   flex-direction: column;
   position: absolute;
   width: 180px;
-  top: 10px;
-  left: 10px;
+  top: 0;
+  left: 0;
   z-index: 10;
 `;
 
@@ -27,10 +27,10 @@ export const PanelHeader = styled.div<{ $isMinimized: boolean }>`
 export const PanelContent = styled.div`
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid black;
-  padding: 8px;
+  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 0;
   user-select: none;
 `;
 
@@ -88,6 +88,6 @@ export const RadioSpan = styled.span`
 
 export const Divider = styled.hr`
   width: 100%;
-  border: 1px solid #ddd;
+  border: 1px solid;
   margin: 0;
 `;
