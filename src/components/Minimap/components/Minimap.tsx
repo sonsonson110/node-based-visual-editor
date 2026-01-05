@@ -148,6 +148,7 @@ function Minimap() {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [isDragging, dragOffset, updateViewportFromMinimap]);
 
