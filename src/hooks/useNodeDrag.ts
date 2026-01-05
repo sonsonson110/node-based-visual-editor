@@ -102,8 +102,8 @@ export const useNodeDrag = () => {
   }, [dispatch, draggedNodeId, nodes, selectedNodeIds, viewport]);
 
   const handleNodeMouseDown = (
-    pageX: number,
-    pageY: number,
+    x: number,
+    y: number,
     nodeId: string,
     withShiftKey: boolean
   ) => {
@@ -111,7 +111,7 @@ export const useNodeDrag = () => {
     hasDragged.current = false;
     potentialDeselection.current = null;
 
-    const worldPos = screenToWorld(pageX, pageY, viewport);
+    const worldPos = screenToWorld(x, y, viewport);
     const nextSelected = new Set(selectedNodeIdSet);
     let entries;
     const nodeListToOffsetEntries = (nodeIds: string[]) => {

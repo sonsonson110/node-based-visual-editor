@@ -97,13 +97,11 @@ export const useNodeResize = () => {
     };
   }, [dispatch, nodes, resizingNodeId, viewport]);
 
-  const handleResizeMouseDown = (e: React.MouseEvent, nodeId: string) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const handleNodeResizeMouseDown = (x: number, y: number, nodeId: string) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return;
 
-    const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
+    const worldPos = screenToWorld(x, y, viewport);
 
     setResizingNodeId(nodeId);
     resizeStart.current = {
@@ -118,6 +116,6 @@ export const useNodeResize = () => {
 
   return {
     resizingNodeId,
-    handleResizeMouseDown,
+    handleNodeResizeMouseDown,
   };
 };

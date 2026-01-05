@@ -14,7 +14,7 @@ export const useMapInteraction = ({
 }: MapInteractionOptions) => {
   const { draggedNodeId, handleNodeMouseDown } = useNodeDrag();
 
-  const { resizingNodeId, handleResizeMouseDown } = useNodeResize();
+  const { resizingNodeId, handleNodeResizeMouseDown } = useNodeResize();
 
   const isPanning = useCanvasPan({
     worldContainerRef,
@@ -41,6 +41,6 @@ export const useMapInteraction = ({
     draggedNodeId,
     resizingNodeId,
     handleNodeMouseDown,
-    handleResizeMouseDown,
+    handleNodeResizeMouseDown,
   };
 };

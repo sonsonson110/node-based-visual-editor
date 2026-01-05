@@ -42,7 +42,7 @@ function App() {
     draggedNodeId,
     resizingNodeId,
     handleNodeMouseDown,
-    handleResizeMouseDown,
+    handleNodeResizeMouseDown,
   } = useMapInteraction({
     worldContainerRef,
   });
@@ -152,7 +152,11 @@ function App() {
               e.stopPropagation();
               handleNodeMouseDown(e.pageX, e.pageY, node.id, e.shiftKey);
             }}
-            onResizeMouseDown={(e) => handleResizeMouseDown(e, node.id)}
+            onResizeMouseDown={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              handleNodeResizeMouseDown(e.pageX, e.pageY, node.id);
+            }}
           />
         ))}
       </WorldContainer>
