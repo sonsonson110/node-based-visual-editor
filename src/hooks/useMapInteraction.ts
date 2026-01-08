@@ -1,7 +1,7 @@
 import { useEffect, type RefObject } from "react";
 import { useCanvasPan } from "./useCanvasPan";
 import { useCanvasZoom } from "./useCanvasZoom";
-import { useNodeDrag } from "./useNodeDrag";
+import { useNodeMouseInteraction } from "./useNodeMouseInteraction";
 import { useNodeResize } from "./useNodeResize";
 import { useSelectionBox } from "./useSelectionBox";
 
@@ -12,7 +12,7 @@ interface MapInteractionOptions {
 export const useMapInteraction = ({
   worldContainerRef,
 }: MapInteractionOptions) => {
-  const { draggedNodeId, handleNodeMouseDown } = useNodeDrag();
+  const { draggedNodeId, handleNodeMouseDown } = useNodeMouseInteraction();
 
   const { resizingNodeId, handleNodeResizeMouseDown } = useNodeResize();
 

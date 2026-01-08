@@ -6,6 +6,13 @@ import {
 } from "./constants";
 import type { MapOrientation, Node, Viewport } from "./types";
 
+/**
+ * Calculates Euclidean distance between two points
+ */
+export function getDistance(x1: number, y1: number, x2: number, y2: number) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
 export function getEdgeId(from: string, to: string) {
   return `${from}->${to}`;
 }
