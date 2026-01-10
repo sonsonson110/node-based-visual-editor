@@ -114,5 +114,5 @@ This requires several architectural updates:
 
 ## Phase 11: Node Content and Styling Enhancements
 
-- **Rich Content Support**: Nodes can now contain complex HTML content, including text, images, and interactive elements. Use `Quilljs` package for rich text editing
+- **Node content**: Nodes can now contain text content
 - **Dynamic State**: Add active and disabled states to nodes with distinct visual styles.
