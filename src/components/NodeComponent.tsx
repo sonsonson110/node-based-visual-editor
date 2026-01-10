@@ -86,7 +86,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
           onKeyDown={handleKeyDown}
           onMouseDown={(e) => e.stopPropagation()}
           placeholder={node.id}
-          style={{ maxWidth: node.width }}
+          $maxWidth={node.width}
         />
       ) : (
         <NodeContentText>{node.content || node.id}</NodeContentText>

@@ -41,35 +41,7 @@ export const SVGContainer = styled.svg`
   pointer-events: none;
 `;
 
-export const NodeContainer = styled.div<{
-  $x: number;
-  $y: number;
-  $width: number;
-  $height: number;
-  $isSelected: boolean;
-  $isDisabled?: boolean;
-}>`
-  ${({ $x, $y, $width, $height, $isSelected, $isDisabled }) => css`
-    left: ${$x}px;
-    top: ${$y}px;
-    width: ${$width - 2}px;
-    height: ${$height - 2}px;
-    border: ${$isSelected ? "1px solid #007bff" : "1px solid black"};
-    ${$isDisabled &&
-    css`
-      opacity: 0.5;
-    `}
-  `}
-  position: absolute;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
-export const NodeContentTextarea = styled.textarea`
+export const NodeContentTextarea = styled.textarea<{ $maxWidth?: number }>`
   position: absolute;
   left: 50%;
   top: 50%;
@@ -82,6 +54,7 @@ export const NodeContentTextarea = styled.textarea`
   font-size: inherit;
   background: transparent;
   field-sizing: content;
+  max-width: ${({ $maxWidth }) => ($maxWidth ? `${$maxWidth}px` : "100%")};
 `;
 
 export const NodeContentText = styled.span`
@@ -115,6 +88,44 @@ export const NodeResizingIndicator = styled.div`
   pointer-events: none;
   font-size: 10px;
   margin-top: 4px;
+`;
+
+export const NodeContainer = styled.div<{
+  $x: number;
+  $y: number;
+  $width: number;
+  $height: number;
+  $isSelected: boolean;
+  $isDisabled?: boolean;
+}>`
+  ${({ $x, $y, $width, $height, $isSelected, $isDisabled }) => {
+    const baseBorderColor = $isSelected ? "#007bff" : "#000000";
+    const borderColor = $isDisabled ? `${baseBorderColor}80` : baseBorderColor;
+
+    return css`
+      left: ${$x}px;
+      top: ${$y}px;
+      width: ${$width - 2}px;
+      height: ${$height - 2}px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: ${borderColor};
+      background: ${$isDisabled ? "#FFFFFF80" : "white"};
+
+      ${$isDisabled &&
+      css`
+        & ${NodeContentText}, & ${NodeContentTextarea}, & ${ResizeHandle} {
+          opacity: 0.5;
+        }
+      `}
+    `;
+  }}
+  position: absolute;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const dashAnimation = keyframes`
