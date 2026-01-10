@@ -16,6 +16,7 @@ import {
   setSelectedEdgeIds,
   setSelectedNodeIds,
   updateEdge,
+  updateNode,
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -157,6 +158,9 @@ function App() {
               e.preventDefault();
               handleNodeResizeMouseDown(e.pageX, e.pageY, node.id);
             }}
+            onContentChange={(newContent) =>
+              dispatch(updateNode({ id: node.id, content: newContent }))
+            }
           />
         ))}
       </WorldContainer>

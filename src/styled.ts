@@ -47,13 +47,20 @@ export const NodeContainer = styled.div<{
   $width: number;
   $height: number;
   $isSelected: boolean;
+  $isDisabled?: boolean;
 }>`
-  ${({ $x, $y, $width, $height, $isSelected }) => css`
+  ${({ $x, $y, $width, $height, $isSelected, $isDisabled }) => css`
     left: ${$x}px;
     top: ${$y}px;
     width: ${$width - 2}px;
     height: ${$height - 2}px;
     border: ${$isSelected ? "1px solid #007bff" : "1px solid black"};
+    ${$isDisabled &&
+    css`
+      opacity: 0.5;
+      pointer-events: none;
+      background: #e0e0e0;
+    `}
   `}
   position: absolute;
   background: white;
@@ -62,6 +69,23 @@ export const NodeContainer = styled.div<{
   display: flex;
   align-items: center;
   justify-content: center;
+`;
+
+export const NodeContentTextarea = styled.textarea`
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 100%;
+  max-width: 300px;
+  border: none;
+  outline: none;
+  resize: none;
+  text-align: center;
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  field-sizing: content;
 `;
 
 export const ResizeHandle = styled.div`
