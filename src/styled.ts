@@ -58,8 +58,6 @@ export const NodeContainer = styled.div<{
     ${$isDisabled &&
     css`
       opacity: 0.5;
-      pointer-events: none;
-      background: #e0e0e0;
     `}
   `}
   position: absolute;
@@ -76,8 +74,6 @@ export const NodeContentTextarea = styled.textarea`
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  min-width: 100%;
-  max-width: 300px;
   border: none;
   outline: none;
   resize: none;
@@ -86,6 +82,15 @@ export const NodeContentTextarea = styled.textarea`
   font-size: inherit;
   background: transparent;
   field-sizing: content;
+`;
+
+export const NodeContentText = styled.span`
+  width: 100%;
+  height: 100%;
+  max-height: fit-content;
+  word-break: break-all;
+  text-align: center;
+  pointer-events: none;
 `;
 
 export const ResizeHandle = styled.div`

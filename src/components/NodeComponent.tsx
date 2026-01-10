@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   NodeContainer,
+  NodeContentText,
   NodeContentTextarea,
   NodeResizingIndicator,
   ResizeHandle,
@@ -85,13 +86,12 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
           onKeyDown={handleKeyDown}
           onMouseDown={(e) => e.stopPropagation()}
           placeholder={node.id}
+          style={{ maxWidth: node.width }}
         />
       ) : (
-        node.content || node.id
+        <NodeContentText>{node.content || node.id}</NodeContentText>
       )}
-      {isSelected && !node.isDisabled && (
-        <ResizeHandle onMouseDown={onResizeMouseDown} />
-      )}
+      {isSelected && <ResizeHandle onMouseDown={onResizeMouseDown} />}
       {isResizing && (
         <NodeResizingIndicator>{`${displayWidth} x ${displayHeight}`}</NodeResizingIndicator>
       )}

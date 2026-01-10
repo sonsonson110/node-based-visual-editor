@@ -14,10 +14,11 @@ import {
   setNodes,
   setSelectedEdgeIds,
   setSelectedNodeIds,
+  updateNode,
 } from "../../../store/editorSlice";
 import type { Node } from "../../../types";
 import { screenToWorld } from "../../../utils";
-import { HeaderRow, Row } from "../styled";
+import { CheckboxLabel, HeaderRow, Row, StyleRow } from "../styled";
 import { CollapsibleSection } from "./CollapsibleSection";
 
 export const NodeGroup: React.FC = () => {
@@ -38,6 +39,44 @@ export const NodeGroup: React.FC = () => {
     () => new Set(selectedNodeIds),
     [selectedNodeIds]
   );
+
+  const selectedNode = useMemo(
+    () =>
+      selectedNodeIds.length > 0
+        ? nodes.find((n) => n.id === selectedNodeIds[0])
+        : undefined,
+    [nodes, selectedNodeIds]
+  );
+
+  const displayingNodeStyle = useMemo(() => {
+    const defaultStyle = { isDisabled: false };
+
+    if (selectedNodeIds.length === 0 || !selectedNode) {
+      return defaultStyle;
+    }
+
+    const normalizedStyle = {
+      isDisabled: selectedNode.isDisabled ?? defaultStyle.isDisabled,
+    };
+
+    if (selectedNodeIds.length === 1) {
+      return normalizedStyle;
+    }
+
+    const allMatchDisabled = selectedNodeIds.every((nodeId) => {
+      const node = nodeMap.get(nodeId);
+      return (
+        (node?.isDisabled ?? defaultStyle.isDisabled) ===
+        normalizedStyle.isDisabled
+      );
+    });
+
+    return {
+      isDisabled: allMatchDisabled
+        ? normalizedStyle.isDisabled
+        : defaultStyle.isDisabled,
+    };
+  }, [nodeMap, selectedNode, selectedNodeIds]);
 
   const handleAddNode = () => {
     if (!newNodeId.trim()) {
@@ -80,6 +119,12 @@ export const NodeGroup: React.FC = () => {
     dispatch(setSelectedEdgeIds([]));
   };
 
+  const handleNodeDisabledChange = (isDisabled: boolean) => {
+    selectedNodeIds.forEach((nodeId) => {
+      dispatch(updateNode({ id: nodeId, isDisabled }));
+    });
+  };
+
   return (
     <CollapsibleSection title="Nodes">
       <Row>
@@ -103,6 +148,19 @@ export const NodeGroup: React.FC = () => {
           Remove
         </button>
       </HeaderRow>
+      {selectedNodeIds.length > 0 && (
+        <StyleRow>
+          <strong>Style</strong>
+          <CheckboxLabel>
+            <input
+              type="checkbox"
+              checked={displayingNodeStyle.isDisabled}
+              onChange={(e) => handleNodeDisabledChange(e.target.checked)}
+            />
+            Disabled
+          </CheckboxLabel>
+        </StyleRow>
+      )}
     </CollapsibleSection>
   );
 };
