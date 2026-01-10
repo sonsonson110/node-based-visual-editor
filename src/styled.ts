@@ -12,27 +12,6 @@ export const RootContainer = styled.div`
     linear-gradient(90deg, #ccc 1px, transparent 1px);
 `;
 
-export const UIContainer = styled.div`
-  position: absolute;
-  width: 180px;
-  top: 10px;
-  left: 10px;
-  z-index: 10;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 10px;
-  border-radius: 5px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  user-select: none;
-`;
-
-export const InputGroup = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-`;
-
 export const PositionDisplay = styled.div`
   position: absolute;
   bottom: 10px;
@@ -62,28 +41,29 @@ export const SVGContainer = styled.svg`
   pointer-events: none;
 `;
 
-export const NodeContainer = styled.div<{
-  $x: number;
-  $y: number;
-  $width: number;
-  $height: number;
-  $isSelected: boolean;
-}>`
-  ${({ $x, $y, $width, $height, $isSelected }) => css`
-    left: ${$x}px;
-    top: ${$y}px;
-    width: ${$width - 2}px;
-    height: ${$height - 2}px;
-    border: ${$isSelected ? "1px solid #007bff" : "1px solid black"};
-  `}
+export const NodeContentTextarea = styled.textarea<{ $maxWidth?: number }>`
   position: absolute;
-  background: white;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  user-select: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  border: none;
+  outline: none;
+  resize: none;
+  text-align: center;
+  font-family: inherit;
+  font-size: inherit;
+  background: transparent;
+  field-sizing: content;
+  max-width: ${({ $maxWidth }) => ($maxWidth ? `${$maxWidth}px` : "100%")};
+`;
+
+export const NodeContentText = styled.span`
+  width: 100%;
+  height: 100%;
+  max-height: fit-content;
+  word-break: break-all;
+  text-align: center;
+  pointer-events: none;
 `;
 
 export const ResizeHandle = styled.div`
@@ -94,7 +74,6 @@ export const ResizeHandle = styled.div`
   height: 8px;
   cursor: nwse-resize;
   background: linear-gradient(135deg, transparent 50%, #007bff 50%);
-  border-bottom-right-radius: 2px;
 `;
 
 export const NodeResizingIndicator = styled.div`
@@ -109,6 +88,44 @@ export const NodeResizingIndicator = styled.div`
   pointer-events: none;
   font-size: 10px;
   margin-top: 4px;
+`;
+
+export const NodeContainer = styled.div<{
+  $x: number;
+  $y: number;
+  $width: number;
+  $height: number;
+  $isSelected: boolean;
+  $isDisabled?: boolean;
+}>`
+  ${({ $x, $y, $width, $height, $isSelected, $isDisabled }) => {
+    const baseBorderColor = $isSelected ? "#007bff" : "#000000";
+    const borderColor = $isDisabled ? `${baseBorderColor}80` : baseBorderColor;
+
+    return css`
+      left: ${$x}px;
+      top: ${$y}px;
+      width: ${$width - 2}px;
+      height: ${$height - 2}px;
+      border-width: 1px;
+      border-style: solid;
+      border-color: ${borderColor};
+      background: ${$isDisabled ? "#FFFFFF80" : "white"};
+
+      ${$isDisabled &&
+      css`
+        & ${NodeContentText}, & ${NodeContentTextarea}, & ${ResizeHandle} {
+          opacity: 0.5;
+        }
+      `}
+    `;
+  }}
+  position: absolute;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 const dashAnimation = keyframes`

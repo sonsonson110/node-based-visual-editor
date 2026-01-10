@@ -1,15 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../constants";
-import { useAppSelector, useMinimap } from "../hooks";
+import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../../../constants";
+import { useAppSelector, useMinimap } from "../../../hooks";
 import {
   selectSelectedEdgeIds,
   selectSelectedNodeIds,
-} from "../store/editorSlice";
-import { getEdgeId, getRectCenter } from "../utils";
+} from "../../../store/editorSlice";
+import { getEdgeId, getRectCenter } from "../../../utils";
+import { MapWrapper } from "../styled";
 
-type MinimapProps = React.HTMLProps<HTMLDivElement>;
-
-function Minimap(props: MinimapProps) {
+function Minimap() {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
   const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
   const {
@@ -149,44 +148,32 @@ function Minimap(props: MinimapProps) {
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mouseup", handleMouseUp);
+      if (rafId) cancelAnimationFrame(rafId);
     };
   }, [isDragging, dragOffset, updateViewportFromMinimap]);
 
   return (
-    <div {...props}>
-      <div
-        style={{
-          width: MINIMAP_WIDTH,
-          height: MINIMAP_HEIGHT,
-          border: "1px solid black",
-          background: "rgba(255, 255, 255, 0.8)",
-          overflow: "hidden",
-          userSelect: "none",
-        }}
-        onMouseDown={handleMouseDown}
-        ref={containerRef}
+    <MapWrapper onMouseDown={handleMouseDown} ref={containerRef}>
+      <svg
+        width="100%"
+        height="100%"
+        viewBox={`0 0 ${MINIMAP_WIDTH} ${MINIMAP_HEIGHT}`}
+        style={{ display: "block" }}
       >
-        <svg
-          width="100%"
-          height="100%"
-          viewBox={`0 0 ${MINIMAP_WIDTH} ${MINIMAP_HEIGHT}`}
-          style={{ display: "block" }}
-        >
-          {renderMinimapEdges()}
-          {renderMinimapNodes()}
+        {renderMinimapEdges()}
+        {renderMinimapNodes()}
 
-          <rect
-            x={viewportIndicator.x}
-            y={viewportIndicator.y}
-            width={viewportIndicator.width}
-            height={viewportIndicator.height}
-            stroke="#e24a4a"
-            fill="#e24a4a"
-            fillOpacity={0.1}
-          />
-        </svg>
-      </div>
-    </div>
+        <rect
+          x={viewportIndicator.x}
+          y={viewportIndicator.y}
+          width={viewportIndicator.width}
+          height={viewportIndicator.height}
+          stroke="#e24a4a"
+          fill="#e24a4a"
+          fillOpacity={0.1}
+        />
+      </svg>
+    </MapWrapper>
   );
 }
 

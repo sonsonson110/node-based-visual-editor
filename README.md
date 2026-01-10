@@ -111,3 +111,8 @@ This requires several architectural updates:
 - **UI Refinements**:
   - Organized Control Panel into clear sections (Nodes, Edges, Orientation).
   - Fixed event bubbling issues to prevent accidental deselection when interacting with edges.
+
+## Phase 11: Node Content and Styling Enhancements
+
+- **Node content**: Nodes can now contain text content
+- **Dynamic State**: Add active and disabled states to nodes with distinct visual styles.

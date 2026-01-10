@@ -6,6 +6,8 @@ export interface Node {
   y: number;
   width: number;
   height: number;
+  content?: string;
+  isDisabled?: boolean;
 }
 
 export interface Edge {
