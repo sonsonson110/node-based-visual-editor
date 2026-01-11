@@ -37,65 +37,84 @@ export const useSelectionBox = ({
   const [selectionBox, setSelectionBox] = useState<SelectionBoxMeta | null>(
     null
   );
+  const pointerTypeRef = useRef<string | null>(null); // Track if mouse or touch
 
   const nodeMap = useMemo(
     () => new Map(nodes.map((node) => [node.id, node])),
     [nodes]
   );
 
-  // Selection box mouse logic
+  // Selection box logic (mouse only) and tap-to-deselect (both mouse and touch)
   useEffect(() => {
-    function handleMouseDown(e: MouseEvent) {
-      if (draggedNodeId || isPanning || e.button !== 0) return;
-      const startX = e.pageX;
-      const startY = e.pageY;
+    function handlePointerDown(e: PointerEvent) {
+      if (e.button !== 0) return;
+      
+      // For mouse: respect isPanning and draggedNodeId
+      // For touch: always track for tap-to-deselect (panning will be handled separately)
+      if (e.pointerType === "mouse" && (draggedNodeId || isPanning)) return;
+      
+      pointerTypeRef.current = e.pointerType;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      
+      // Track start position for both mouse and touch
       selectionStartRef.current = { startX, startY };
     }
 
-    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("pointerdown", handlePointerDown);
     return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [draggedNodeId, isPanning]);
 
   useEffect(() => {
-    function handleMouseMove(ev: MouseEvent) {
+    function handlePointerMove(ev: PointerEvent) {
       if (!selectionStartRef.current) return;
-      setSelectionBox({
-        ...selectionStartRef.current,
-        endX: ev.pageX,
-        endY: ev.pageY,
-      });
+      
+      // Only show selection box for mouse, not touch
+      if (pointerTypeRef.current === "mouse") {
+        setSelectionBox({
+          ...selectionStartRef.current,
+          endX: ev.clientX,
+          endY: ev.clientY,
+        });
+      }
     }
-    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("pointermove", handlePointerMove);
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("pointermove", handlePointerMove);
     };
   }, []);
 
   useEffect(() => {
-    function handleMouseUp(ev: MouseEvent) {
+    function handlePointerUp(ev: PointerEvent) {
       if (ev.button !== 0 || !selectionStartRef.current) return;
 
       const selectionArea = Math.abs(
-        (selectionStartRef.current.startX - ev.pageX) *
-          (selectionStartRef.current.startY - ev.pageY)
+        (selectionStartRef.current.startX - ev.clientX) *
+          (selectionStartRef.current.startY - ev.clientY)
       );
       const areaThreshold = 25;
+      
       if (selectionArea < areaThreshold) {
-        // If selection box area is too small, treat it as a click
+        // Small movement = tap/click (not a drag)
         const target = ev.target as Element;
         if (!target.closest("[data-interactive]")) {
-          dispatch(setSelectedNodeIds([]));
-          dispatch(setSelectedEdgeIds([]));
+          // Clicked/tapped empty space - deselect all (works for both mouse and touch)
+          // Only deselect if not currently dragging a node
+          if (!draggedNodeId) {
+            dispatch(setSelectedNodeIds([]));
+            dispatch(setSelectedEdgeIds([]));
+          }
         }
-      } else {
+      } else if (pointerTypeRef.current === "mouse") {
+        // Only process selection box for mouse, not touch
         const world1 = screenToWorld(
           selectionStartRef.current.startX,
           selectionStartRef.current.startY,
           viewport
         );
-        const world2 = screenToWorld(ev.pageX, ev.pageY, viewport);
+        const world2 = screenToWorld(ev.clientX, ev.clientY, viewport);
 
         const xMin = Math.min(world1.x, world2.x);
         const xMax = Math.max(world1.x, world2.x);
@@ -134,7 +153,7 @@ export const useSelectionBox = ({
               maxY: edgeMaxY,
             } = getBezierBounds(x1, y1, cp1x, cp1y, cp2x, cp2y, x2, y2);
 
-            // Check if selection box fully contains the edge bounding  ox
+            // Check if selection box fully contains the edge bounding box
             return (
               xMin <= edgeMinX &&
               xMax >= edgeMaxX &&
@@ -147,14 +166,17 @@ export const useSelectionBox = ({
         dispatch(setSelectedNodeIds(Array.from(new Set(insideNodeIds))));
         dispatch(setSelectedEdgeIds(Array.from(new Set(insideEdgeIds))));
       }
+      // If touch with large movement, do nothing (was probably panning)
+      
       setSelectionBox(null);
       selectionStartRef.current = null;
+      pointerTypeRef.current = null;
     }
-    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("pointerup", handlePointerUp);
     return () => {
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("pointerup", handlePointerUp);
     };
-  }, [dispatch, edges, mapOrientation, nodeMap, nodes, viewport]);
+  }, [dispatch, edges, mapOrientation, nodeMap, nodes, viewport, draggedNodeId]);
 
   return selectionBox;
 };
