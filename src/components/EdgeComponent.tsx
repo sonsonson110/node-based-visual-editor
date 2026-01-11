@@ -15,6 +15,7 @@ interface EdgeComponentProps {
   onLabelChange?: (newLabel: string) => void;
 }
 
+const DOUBLE_TAP_DELAY = 300; // ms
 function EdgeComponent({
   fromNode,
   toNode,
@@ -35,10 +36,26 @@ function EdgeComponent({
   const [isEditing, setIsEditing] = useState(false);
   const [editedLabel, setEditedLabel] = useState(label || "");
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const lastTapTime = useRef<number>(0);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.select();
+
+      // Handle click/touch outside to blur on touch devices
+      const handlePointerDownOutside = (e: PointerEvent) => {
+        if (
+          inputRef.current &&
+          !inputRef.current.contains(e.target as HTMLElement)
+        ) {
+          inputRef.current.blur();
+        }
+      };
+
+      document.addEventListener("pointerdown", handlePointerDownOutside, true);
+      return () => {
+        document.removeEventListener("pointerdown", handlePointerDownOutside, true);
+      };
     }
   }, [isEditing]);
 
@@ -46,6 +63,25 @@ function EdgeComponent({
     e.stopPropagation();
     setIsEditing(true);
     setEditedLabel(label || "");
+  };
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    // Handle double-tap for touch devices
+    if (e.pointerType === "touch") {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTime.current;
+
+      if (timeSinceLastTap < DOUBLE_TAP_DELAY && timeSinceLastTap > 0) {
+        // Double tap detected
+        e.stopPropagation();
+        e.preventDefault();
+        setIsEditing(true);
+        setEditedLabel(label || "");
+        lastTapTime.current = 0; // Reset to prevent triple-tap
+      } else {
+        lastTapTime.current = now;
+      }
+    }
   };
 
   const handleBlur = () => {
@@ -73,7 +109,12 @@ function EdgeComponent({
     <g
       onClick={onClick}
       onDoubleClick={handleDoubleClick}
-      style={{ pointerEvents: "all", cursor: "pointer" }}
+      onPointerDown={handlePointerDown}
+      style={{
+        pointerEvents: "all",
+        cursor: "pointer",
+        WebkitTapHighlightColor: "transparent",
+      }}
       data-interactive
     >
       {/* Hit area - invisible but clickable */}
@@ -161,7 +202,7 @@ function EdgeComponent({
           width="150"
           height="100"
           style={{ overflow: "visible" }}
-          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
         >
           <div
             style={{

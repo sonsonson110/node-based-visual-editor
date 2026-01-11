@@ -1,8 +1,8 @@
 import styled, { css, keyframes } from "styled-components";
 
 export const RootContainer = styled.div`
-  width: 100vw;
-  height: 100vh;
+  width: 100dvw;
+  height: 100dvh;
   background-color: #f0f0f0;
   position: relative;
   overflow: hidden;
@@ -10,6 +10,9 @@ export const RootContainer = styled.div`
     linear-gradient(90deg, #999 1px, transparent 1px),
     linear-gradient(#ccc 1px, transparent 1px),
     linear-gradient(90deg, #ccc 1px, transparent 1px);
+  touch-action: none; /* Prevents default touch behaviors like pinch-zoom, pan */
+  -webkit-user-select: none; /* Prevents text selection on iOS */
+  user-select: none;
 `;
 
 export const PositionDisplay = styled.div`

@@ -8,6 +8,7 @@ export const PanelContainer = styled.div`
   top: 0;
   left: 0;
   z-index: 10;
+  touch-action: auto; /* Allow normal touch behavior in control panel */
 `;
 
 export const PanelHeader = styled.div<{ $isMinimized: boolean }>`

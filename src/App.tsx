@@ -42,8 +42,8 @@ function App() {
     isPanning,
     draggedNodeId,
     resizingNodeId,
-    handleNodeMouseDown,
-    handleNodeResizeMouseDown,
+    handleNodePointerDown,
+    handleNodeResizePointerDown,
   } = useMapInteraction({
     worldContainerRef,
   });
@@ -147,16 +147,16 @@ function App() {
             node={node}
             isSelected={selectedNodeIdSet.has(node.id)}
             isResizing={resizingNodeId === node.id}
-            onMouseDown={(e) => {
+            onPointerDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();
               e.stopPropagation();
-              handleNodeMouseDown(e.pageX, e.pageY, node.id, e.shiftKey);
+              handleNodePointerDown(e.clientX, e.clientY, node.id, e.shiftKey, e.pointerId);
             }}
-            onResizeMouseDown={(e) => {
+            onResizePointerDown={(e) => {
               e.stopPropagation();
               e.preventDefault();
-              handleNodeResizeMouseDown(e.pageX, e.pageY, node.id);
+              handleNodeResizePointerDown(e.clientX, e.clientY, node.id);
             }}
             onContentChange={(newContent) =>
               dispatch(updateNode({ id: node.id, content: newContent }))

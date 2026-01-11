@@ -21,7 +21,7 @@ export const useNodeResize = () => {
   const resizeRaf = useRef<number | null>(null);
 
   useEffect(() => {
-    function handleMouseMove(e: MouseEvent) {
+    function handlePointerMove(e: PointerEvent) {
       if (!resizingNodeId || !resizeStart.current) return;
 
       if (resizeRaf.current) {
@@ -30,7 +30,7 @@ export const useNodeResize = () => {
 
       resizeRaf.current = requestAnimationFrame(() => {
         const snapEnabled = !e.altKey;
-        const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
+        const worldPos = screenToWorld(e.clientX, e.clientY, viewport);
         const { startX, startY, initialWidth, initialHeight, nodeX, nodeY } =
           resizeStart.current!;
 
@@ -75,7 +75,7 @@ export const useNodeResize = () => {
       });
     }
 
-    function handleMouseUp() {
+    function handlePointerUp() {
       setResizingNodeId(null);
       resizeStart.current = null;
       if (resizeRaf.current) {
@@ -84,20 +84,22 @@ export const useNodeResize = () => {
     }
 
     if (resizingNodeId) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
       if (resizeRaf.current) {
         cancelAnimationFrame(resizeRaf.current);
       }
     };
   }, [dispatch, nodes, resizingNodeId, viewport]);
 
-  const handleNodeResizeMouseDown = (x: number, y: number, nodeId: string) => {
+  const handleNodeResizePointerDown = (x: number, y: number, nodeId: string) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (!node) return;
 
@@ -116,6 +118,6 @@ export const useNodeResize = () => {
 
   return {
     resizingNodeId,
-    handleNodeResizeMouseDown,
+    handleNodeResizePointerDown,
   };
 };

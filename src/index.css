@@ -2,6 +2,12 @@ html,
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+  overscroll-behavior: none; /* Prevents pull-to-refresh and overscroll bounce */
+  touch-action: none; /* Prevents pinch-zoom and other default touch gestures */
+  -webkit-touch-callout: none; /* Prevents iOS callout menu on long press */
+  -webkit-user-select: none; /* Prevents text selection on iOS */
+  user-select: none;
+  position: fixed; /* Prevents address bar from hiding/showing on scroll */
 }
 
 body {
@@ -12,4 +18,7 @@ input,
 textarea,
 button {
   min-width: 0;
+  -webkit-user-select: text; /* Allow text selection in form elements */
+  user-select: text;
+  touch-action: auto; /* Allow normal touch behavior for tapping and focusing */
 }

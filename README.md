@@ -116,3 +116,18 @@ This requires several architectural updates:
 
 - **Node content**: Nodes can now contain text content
 - **Dynamic State**: Add active and disabled states to nodes with distinct visual styles.
+
+## Phase 12: Touch & Mobile Support
+
+- **Universal Input**: Full support for both mouse and touch interactions across all features.
+- **Mobile Gestures**:
+  - Touch panning with single finger
+  - Pinch-to-zoom with two fingers
+  - Double-tap to edit nodes and edges
+  - Touch drag for nodes and minimap
+- **Smart Intent Detection**: Distinguishes between taps and drags to prevent accidental actions.
+- **Mobile-Optimized UX**:
+  - Prevented browser default behaviors (pull-to-refresh, zoom controls)
+  - Platform-specific features (selection box on desktop only)
+  - Tap anywhere to deselect on both platforms
+- **Seamless Editing**: Input fields blur correctly when clicking/tapping outside, even while switching between nodes and edges.

@@ -28,6 +28,8 @@ import { getDistance, screenToWorld, snapToGrid } from "../utils";
  * [DRAGGING]
  *   ├─ POINTER_MOVE → updateDrag
  *   └─ POINTER_UP → endDrag → [IDLE]
+ *
+ * Supports both mouse and touch via pointer events.
  */
 type InteractionState = "IDLE" | "POINTER_DOWN" | "DRAGGING";
 
@@ -37,6 +39,7 @@ const DRAG_THRESHOLD = 3;
 // Context stored when pointer is pressed
 interface PointerDownContext {
   nodeId: string;
+  pointerId: number; // Track which pointer initiated the drag
   startX: number; // Screen coordinates at pointer down
   startY: number;
   withShiftKey: boolean;
@@ -95,12 +98,12 @@ export const useNodeMouseInteraction = () => {
    * Updates node positions during drag (called on POINTER_MOVE in DRAGGING state)
    */
   const updateDrag = useCallback(
-    (e: MouseEvent) => {
+    (e: PointerEvent) => {
       const ctx = contextRef.current;
       if (!ctx) return;
 
       const snapEnabled = !e.altKey;
-      const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
+      const worldPos = screenToWorld(e.clientX, e.clientY, viewport);
 
       dispatch(
         setNodes(
@@ -146,13 +149,21 @@ export const useNodeMouseInteraction = () => {
 
   // Global event listeners for state machine transitions
   useEffect(() => {
-    function handleMouseMove(e: MouseEvent) {
+    function handlePointerMove(e: PointerEvent) {
       const ctx = contextRef.current;
       if (!ctx) return;
 
+      // Only respond to the pointer that initiated the interaction
+      if (e.pointerId !== ctx.pointerId) return;
+
       if (state === "POINTER_DOWN") {
         // Check if movement exceeds drag threshold
-        const distance = getDistance(ctx.startX, ctx.startY, e.pageX, e.pageY);
+        const distance = getDistance(
+          ctx.startX,
+          ctx.startY,
+          e.clientX,
+          e.clientY
+        );
         if (distance >= DRAG_THRESHOLD) {
           // Transition: POINTER_DOWN → DRAGGING
           setState("DRAGGING");
@@ -171,7 +182,11 @@ export const useNodeMouseInteraction = () => {
       }
     }
 
-    function handleMouseUp(e: MouseEvent) {
+    function handlePointerUp(e: PointerEvent) {
+      const ctx = contextRef.current;
+
+      // Only respond to the pointer that initiated the interaction
+      if (!ctx || e.pointerId !== ctx.pointerId) return;
       if (e.button !== 0) return;
 
       if (state === "POINTER_DOWN") {
@@ -184,15 +199,29 @@ export const useNodeMouseInteraction = () => {
       }
     }
 
+    function handlePointerCancel(e: PointerEvent) {
+      const ctx = contextRef.current;
+
+      // Only respond to the pointer that initiated the interaction
+      if (!ctx || e.pointerId !== ctx.pointerId) return;
+
+      // Cancel always ends the interaction
+      if (state !== "IDLE") {
+        endDrag();
+      }
+    }
+
     // Only attach listeners when not IDLE
     if (state !== "IDLE") {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerCancel);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerCancel);
       if (dragRaf.current) {
         cancelAnimationFrame(dragRaf.current);
       }
@@ -203,8 +232,14 @@ export const useNodeMouseInteraction = () => {
    * Entry point: handles initial pointer down on a node
    * Transition: IDLE → POINTER_DOWN
    */
-  const handleNodeMouseDown = useCallback(
-    (x: number, y: number, nodeId: string, withShiftKey: boolean) => {
+  const handleNodePointerDown = useCallback(
+    (
+      x: number,
+      y: number,
+      nodeId: string,
+      withShiftKey: boolean,
+      pointerId: number
+    ) => {
       if (state !== "IDLE") return;
 
       const worldPos = screenToWorld(x, y, viewport);
@@ -258,10 +293,9 @@ export const useNodeMouseInteraction = () => {
         dispatch(setSelectedNodeIds(nextSelectedArray));
         offsets = computeOffsets(nextSelectedArray);
       }
-
-      // Store context for subsequent events
       contextRef.current = {
         nodeId,
+        pointerId,
         startX: x,
         startY: y,
         withShiftKey,
@@ -278,6 +312,6 @@ export const useNodeMouseInteraction = () => {
 
   return {
     draggedNodeId,
-    handleNodeMouseDown,
+    handleNodePointerDown,
   };
 };
