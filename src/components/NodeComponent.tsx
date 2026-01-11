@@ -13,8 +13,8 @@ interface NodeComponentProps extends React.HTMLAttributes<HTMLDivElement> {
   node: Node;
   isSelected: boolean;
   isResizing: boolean;
-  onMouseDown: (e: React.MouseEvent) => void;
-  onResizeMouseDown: (e: React.MouseEvent) => void;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onResizePointerDown: (e: React.PointerEvent) => void;
   onContentChange?: (newContent: string) => void;
 }
 
@@ -22,8 +22,8 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   node,
   isSelected,
   isResizing,
-  onMouseDown,
-  onResizeMouseDown,
+  onPointerDown,
+  onResizePointerDown,
   onContentChange,
 }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -73,7 +73,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
       $height={node.height}
       $isSelected={isSelected}
       $isDisabled={node.isDisabled}
-      onMouseDown={onMouseDown}
+      onPointerDown={onPointerDown}
       onDoubleClick={handleDoubleClick}
       data-interactive
     >
@@ -84,14 +84,14 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
           onChange={(e) => setEditedContent(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
-          onMouseDown={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
           placeholder={node.id}
           $maxWidth={node.width}
         />
       ) : (
         <NodeContentText>{node.content || node.id}</NodeContentText>
       )}
-      {isSelected && <ResizeHandle onMouseDown={onResizeMouseDown} />}
+      {isSelected && <ResizeHandle onPointerDown={onResizePointerDown} />}
       {isResizing && (
         <NodeResizingIndicator>{`${displayWidth} x ${displayHeight}`}</NodeResizingIndicator>
       )}

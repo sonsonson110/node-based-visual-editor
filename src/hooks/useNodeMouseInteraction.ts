@@ -28,6 +28,8 @@ import { getDistance, screenToWorld, snapToGrid } from "../utils";
  * [DRAGGING]
  *   ├─ POINTER_MOVE → updateDrag
  *   └─ POINTER_UP → endDrag → [IDLE]
+ *
+ * Supports both mouse and touch via pointer events.
  */
 type InteractionState = "IDLE" | "POINTER_DOWN" | "DRAGGING";
 
@@ -95,12 +97,12 @@ export const useNodeMouseInteraction = () => {
    * Updates node positions during drag (called on POINTER_MOVE in DRAGGING state)
    */
   const updateDrag = useCallback(
-    (e: MouseEvent) => {
+    (e: PointerEvent) => {
       const ctx = contextRef.current;
       if (!ctx) return;
 
       const snapEnabled = !e.altKey;
-      const worldPos = screenToWorld(e.pageX, e.pageY, viewport);
+      const worldPos = screenToWorld(e.clientX, e.clientY, viewport);
 
       dispatch(
         setNodes(
@@ -146,13 +148,13 @@ export const useNodeMouseInteraction = () => {
 
   // Global event listeners for state machine transitions
   useEffect(() => {
-    function handleMouseMove(e: MouseEvent) {
+    function handlePointerMove(e: PointerEvent) {
       const ctx = contextRef.current;
       if (!ctx) return;
 
       if (state === "POINTER_DOWN") {
         // Check if movement exceeds drag threshold
-        const distance = getDistance(ctx.startX, ctx.startY, e.pageX, e.pageY);
+        const distance = getDistance(ctx.startX, ctx.startY, e.clientX, e.clientY);
         if (distance >= DRAG_THRESHOLD) {
           // Transition: POINTER_DOWN → DRAGGING
           setState("DRAGGING");
@@ -171,7 +173,7 @@ export const useNodeMouseInteraction = () => {
       }
     }
 
-    function handleMouseUp(e: MouseEvent) {
+    function handlePointerUp(e: PointerEvent) {
       if (e.button !== 0) return;
 
       if (state === "POINTER_DOWN") {
@@ -186,13 +188,15 @@ export const useNodeMouseInteraction = () => {
 
     // Only attach listeners when not IDLE
     if (state !== "IDLE") {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
     }
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
       if (dragRaf.current) {
         cancelAnimationFrame(dragRaf.current);
       }
@@ -203,7 +207,7 @@ export const useNodeMouseInteraction = () => {
    * Entry point: handles initial pointer down on a node
    * Transition: IDLE → POINTER_DOWN
    */
-  const handleNodeMouseDown = useCallback(
+  const handleNodePointerDown = useCallback(
     (x: number, y: number, nodeId: string, withShiftKey: boolean) => {
       if (state !== "IDLE") return;
 
@@ -278,6 +282,6 @@ export const useNodeMouseInteraction = () => {
 
   return {
     draggedNodeId,
-    handleNodeMouseDown,
+    handleNodePointerDown,
   };
 };
