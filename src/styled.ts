@@ -108,8 +108,8 @@ export const NodeContainer = styled.div<{
     return css`
       left: ${$x}px;
       top: ${$y}px;
-      width: ${$width - 2}px;
-      height: ${$height - 2}px;
+      width: ${$width}px;
+      height: ${$height}px;
       border-width: 1px;
       border-style: solid;
       border-color: ${borderColor};
@@ -129,6 +129,7 @@ export const NodeContainer = styled.div<{
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
 `;
 
 const dashAnimation = keyframes`

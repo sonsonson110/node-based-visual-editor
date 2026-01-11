@@ -37,7 +37,7 @@ export function useMinimap() {
       xMax = Math.max(xMax, node.x + node.width);
       yMax = Math.max(yMax, node.y + node.height);
     });
-    const padding = 200;
+    const padding = 50;
     return {
       x: xMin - padding,
       y: yMin - padding,
@@ -46,22 +46,76 @@ export function useMinimap() {
     };
   }, [nodes]);
 
-  // Calculate scale to fit world bounds into minimap dimensions
-  const minimapScale = useMemo(() => {
+  // Calculate base scale to fit world bounds into fixed minimap dimensions
+  const baseMinimapScale = useMemo(() => {
+    if (worldBounds.width === 0 || worldBounds.height === 0) return 1;
     const scaleX = MINIMAP_WIDTH / worldBounds.width;
     const scaleY = MINIMAP_HEIGHT / worldBounds.height;
     return Math.min(scaleX, scaleY);
   }, [worldBounds]);
 
+  // Apply viewport zoom to minimap scale, clamped to always fit all content at minimum
+  const minimapScale = useMemo(() => {
+    // When viewport.zoom > 1 (zoomed in), show minimap content larger
+    // When viewport.zoom < 1 (zoomed out), clamp to baseMinimapScale to fit all content
+    return Math.max(baseMinimapScale, baseMinimapScale * viewport.zoom);
+  }, [baseMinimapScale, viewport.zoom]);
+
+  // Calculate the visible content size at current minimap scale
+  const scaledContentSize = useMemo(() => ({
+    width: worldBounds.width * minimapScale,
+    height: worldBounds.height * minimapScale,
+  }), [worldBounds, minimapScale]);
+
+  // Calculate offset to center viewport in minimap when zoomed in
+  const contentOffset = useMemo(() => {
+    const topLeft = screenToWorld(0, 0, viewport);
+    const bottomRight = screenToWorld(screenWidth, screenHeight, viewport);
+    const viewportCenterWorld = {
+      x: (topLeft.x + bottomRight.x) / 2,
+      y: (topLeft.y + bottomRight.y) / 2,
+    };
+
+    // Where the viewport center would be in uncentered minimap coords
+    const viewportCenterMinimap = {
+      x: (viewportCenterWorld.x - worldBounds.x) * minimapScale,
+      y: (viewportCenterWorld.y - worldBounds.y) * minimapScale,
+    };
+
+    // Offset to center the viewport in the minimap
+    let offsetX = MINIMAP_WIDTH / 2 - viewportCenterMinimap.x;
+    let offsetY = MINIMAP_HEIGHT / 2 - viewportCenterMinimap.y;
+
+    // Clamp offset so content doesn't scroll beyond edges
+    // (only matters when content is larger than minimap)
+    if (scaledContentSize.width > MINIMAP_WIDTH) {
+      const minOffset = MINIMAP_WIDTH - scaledContentSize.width;
+      offsetX = clamp(offsetX, minOffset, 0);
+    } else {
+      // Center when content fits
+      offsetX = (MINIMAP_WIDTH - scaledContentSize.width) / 2;
+    }
+
+    if (scaledContentSize.height > MINIMAP_HEIGHT) {
+      const minOffset = MINIMAP_HEIGHT - scaledContentSize.height;
+      offsetY = clamp(offsetY, minOffset, 0);
+    } else {
+      // Center when content fits
+      offsetY = (MINIMAP_HEIGHT - scaledContentSize.height) / 2;
+    }
+
+    return { x: offsetX, y: offsetY };
+  }, [worldBounds, minimapScale, viewport, screenWidth, screenHeight, scaledContentSize]);
+
   const minimapNodes = useMemo(() => {
     return nodes.map((node) => ({
       ...node,
-      x: (node.x - worldBounds.x) * minimapScale,
-      y: (node.y - worldBounds.y) * minimapScale,
+      x: (node.x - worldBounds.x) * minimapScale + contentOffset.x,
+      y: (node.y - worldBounds.y) * minimapScale + contentOffset.y,
       miniWidth: node.width * minimapScale,
       miniHeight: node.height * minimapScale,
     }));
-  }, [nodes, worldBounds, minimapScale]);
+  }, [nodes, worldBounds, minimapScale, contentOffset]);
 
   const minimapNodeMap = useMemo(() => {
     return new Map(minimapNodes.map((node) => [node.id, node]));
@@ -71,8 +125,8 @@ export function useMinimap() {
     const topLeft = screenToWorld(0, 0, viewport);
     const bottomRight = screenToWorld(screenWidth, screenHeight, viewport);
     return {
-      x: (topLeft.x - worldBounds.x) * minimapScale,
-      y: (topLeft.y - worldBounds.y) * minimapScale,
+      x: (topLeft.x - worldBounds.x) * minimapScale + contentOffset.x,
+      y: (topLeft.y - worldBounds.y) * minimapScale + contentOffset.y,
       width: (bottomRight.x - topLeft.x) * minimapScale,
       height: (bottomRight.y - topLeft.y) * minimapScale,
     };
@@ -83,6 +137,7 @@ export function useMinimap() {
     screenWidth,
     worldBounds.x,
     worldBounds.y,
+    contentOffset,
   ]);
 
   const updateViewportFromMinimap = (miniX: number, miniY: number) => {
@@ -105,8 +160,8 @@ export function useMinimap() {
       nextY = clamp(miniY, 0, maxY - safeBuffer);
     }
 
-    const worldX = nextX / minimapScale + worldBounds.x;
-    const worldY = nextY / minimapScale + worldBounds.y;
+    const worldX = (nextX - contentOffset.x) / minimapScale + worldBounds.x;
+    const worldY = (nextY - contentOffset.y) / minimapScale + worldBounds.y;
 
     dispatch(
       setViewport({
