@@ -1,8 +1,10 @@
-## Node-Based Visual Editor
+# Node-Based Visual Editor
 
 Live Demo: [https://node-based-visual-editor.web.app/](https://node-based-visual-editor.web.app/)
 
-# Journal
+![Demo Screenshot](./images/demo_image.jpeg)
+
+## Journal
 
 ## Phase 1: Basic Node Drag & Drop
 
