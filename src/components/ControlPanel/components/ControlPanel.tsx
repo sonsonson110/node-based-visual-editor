@@ -1,4 +1,5 @@
 import React, { Activity, useState } from "react";
+import { DatasetGroup } from "./DatasetGroup";
 import { EdgeGroup } from "./EdgeGroup";
 import { NodeGroup } from "./NodeGroup";
 import { OrientationGroup } from "./OrientationGroup";
@@ -21,6 +22,7 @@ const ControlPanel: React.FC = () => {
       </PanelHeader>
       <Activity mode={isMinimized ? "hidden" : "visible"}>
         <PanelContent>
+          <DatasetGroup />
           <NodeGroup />
           <EdgeGroup />
           <OrientationGroup />
