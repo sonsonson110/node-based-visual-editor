@@ -151,7 +151,7 @@ function App() {
               if (e.button !== 0) return;
               e.preventDefault();
               e.stopPropagation();
-              handleNodePointerDown(e.clientX, e.clientY, node.id, e.shiftKey);
+              handleNodePointerDown(e.clientX, e.clientY, node.id, e.shiftKey, e.pointerId);
             }}
             onResizePointerDown={(e) => {
               e.stopPropagation();

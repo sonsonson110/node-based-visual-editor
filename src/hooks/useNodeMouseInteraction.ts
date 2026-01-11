@@ -39,6 +39,7 @@ const DRAG_THRESHOLD = 3;
 // Context stored when pointer is pressed
 interface PointerDownContext {
   nodeId: string;
+  pointerId: number; // Track which pointer initiated the drag
   startX: number; // Screen coordinates at pointer down
   startY: number;
   withShiftKey: boolean;
@@ -152,9 +153,17 @@ export const useNodeMouseInteraction = () => {
       const ctx = contextRef.current;
       if (!ctx) return;
 
+      // Only respond to the pointer that initiated the interaction
+      if (e.pointerId !== ctx.pointerId) return;
+
       if (state === "POINTER_DOWN") {
         // Check if movement exceeds drag threshold
-        const distance = getDistance(ctx.startX, ctx.startY, e.clientX, e.clientY);
+        const distance = getDistance(
+          ctx.startX,
+          ctx.startY,
+          e.clientX,
+          e.clientY
+        );
         if (distance >= DRAG_THRESHOLD) {
           // Transition: POINTER_DOWN → DRAGGING
           setState("DRAGGING");
@@ -174,6 +183,10 @@ export const useNodeMouseInteraction = () => {
     }
 
     function handlePointerUp(e: PointerEvent) {
+      const ctx = contextRef.current;
+
+      // Only respond to the pointer that initiated the interaction
+      if (!ctx || e.pointerId !== ctx.pointerId) return;
       if (e.button !== 0) return;
 
       if (state === "POINTER_DOWN") {
@@ -186,17 +199,29 @@ export const useNodeMouseInteraction = () => {
       }
     }
 
+    function handlePointerCancel(e: PointerEvent) {
+      const ctx = contextRef.current;
+
+      // Only respond to the pointer that initiated the interaction
+      if (!ctx || e.pointerId !== ctx.pointerId) return;
+
+      // Cancel always ends the interaction
+      if (state !== "IDLE") {
+        endDrag();
+      }
+    }
+
     // Only attach listeners when not IDLE
     if (state !== "IDLE") {
       window.addEventListener("pointermove", handlePointerMove);
       window.addEventListener("pointerup", handlePointerUp);
-      window.addEventListener("pointercancel", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerCancel);
     }
 
     return () => {
       window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("pointerup", handlePointerUp);
-      window.removeEventListener("pointercancel", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerCancel);
       if (dragRaf.current) {
         cancelAnimationFrame(dragRaf.current);
       }
@@ -208,7 +233,13 @@ export const useNodeMouseInteraction = () => {
    * Transition: IDLE → POINTER_DOWN
    */
   const handleNodePointerDown = useCallback(
-    (x: number, y: number, nodeId: string, withShiftKey: boolean) => {
+    (
+      x: number,
+      y: number,
+      nodeId: string,
+      withShiftKey: boolean,
+      pointerId: number
+    ) => {
       if (state !== "IDLE") return;
 
       const worldPos = screenToWorld(x, y, viewport);
@@ -262,10 +293,9 @@ export const useNodeMouseInteraction = () => {
         dispatch(setSelectedNodeIds(nextSelectedArray));
         offsets = computeOffsets(nextSelectedArray);
       }
-
-      // Store context for subsequent events
       contextRef.current = {
         nodeId,
+        pointerId,
         startX: x,
         startY: y,
         withShiftKey,
