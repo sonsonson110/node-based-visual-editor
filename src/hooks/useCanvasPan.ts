@@ -16,6 +16,7 @@ export const useCanvasPan = ({
   const [isPanning, setIsPanning] = useState(false);
   const panStart = useRef({ x: 0, y: 0 });
   const panRaf = useRef<number | null>(null);
+  const activePointers = useRef<Set<number>>(new Set());
 
   // Panning logic - pointerdown handler (supports mouse middle/right-click and touch)
   useEffect(() => {
@@ -25,13 +26,17 @@ export const useCanvasPan = ({
     function handlePointerDown(e: PointerEvent) {
       if (shouldPreventPanning) return;
 
+      // Track all active pointers
+      activePointers.current.add(e.pointerId);
+
       // Mouse: middle button (1) or right button (2)
       // Touch: any touch (button will be 0 for touch)
       const isMousePan =
         e.pointerType === "mouse" && (e.button === 1 || e.button === 2);
       const isTouchPan = e.pointerType === "touch";
 
-      if (isMousePan || isTouchPan) {
+      // Only start panning with single touch or mouse middle/right button
+      if ((isMousePan || (isTouchPan && activePointers.current.size === 1))) {
         e.preventDefault();
         setIsPanning(true);
         panStart.current = {
@@ -55,7 +60,13 @@ export const useCanvasPan = ({
   // Panning logic - pointermove and pointerup handlers
   useEffect(() => {
     function handlePointerMove(e: PointerEvent) {
-      if (!isPanning) return;
+      // Stop panning if multiple touches detected (pinch-to-zoom)
+      if (!isPanning || activePointers.current.size > 1) {
+        if (isPanning && activePointers.current.size > 1) {
+          setIsPanning(false);
+        }
+        return;
+      }
       e.preventDefault();
 
       if (panRaf.current) {
@@ -71,6 +82,9 @@ export const useCanvasPan = ({
       });
     }
     function handlePointerUp(e: PointerEvent) {
+      // Remove pointer from tracking
+      activePointers.current.delete(e.pointerId);
+
       // End panning for mouse middle/right button or any touch
       const isMousePan =
         e.pointerType === "mouse" && (e.button === 1 || e.button === 2);
@@ -81,11 +95,19 @@ export const useCanvasPan = ({
       }
     }
 
+    function handlePointerCancel(e: PointerEvent) {
+      // Remove pointer from tracking
+      activePointers.current.delete(e.pointerId);
+      setIsPanning(false);
+    }
+
     document.addEventListener("pointermove", handlePointerMove);
     document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener("pointercancel", handlePointerCancel);
     return () => {
       document.removeEventListener("pointermove", handlePointerMove);
       document.removeEventListener("pointerup", handlePointerUp);
+      document.removeEventListener("pointercancel", handlePointerCancel);
       if (panRaf.current) {
         cancelAnimationFrame(panRaf.current);
       }
