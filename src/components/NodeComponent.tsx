@@ -29,9 +29,12 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(node.content || "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lastTapTimeRef = useRef<number>(0);
 
   const displayWidth = roundToNearest(node.width, 2);
   const displayHeight = roundToNearest(node.height, 2);
+
+  const DOUBLE_TAP_DELAY = 300; // ms
 
   useEffect(() => {
     if (isEditing && textareaRef.current) {
@@ -40,11 +43,35 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
     }
   }, [isEditing]);
 
-  const handleDoubleClick = (e: React.MouseEvent) => {
+  const startEditing = () => {
     if (node.isDisabled) return;
-    e.stopPropagation();
     setIsEditing(true);
     setEditedContent(node.content || "");
+  };
+
+  const handleDoubleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    startEditing();
+  };
+
+  const handlePointerDownWithDoubleTap = (e: React.PointerEvent) => {
+    // Double-tap detection for touch devices
+    if (e.pointerType === "touch") {
+      const now = Date.now();
+      const timeSinceLastTap = now - lastTapTimeRef.current;
+      
+      if (timeSinceLastTap < DOUBLE_TAP_DELAY) {
+        e.preventDefault();
+        e.stopPropagation();
+        startEditing();
+        lastTapTimeRef.current = 0;
+        return;
+      }
+      lastTapTimeRef.current = now;
+    }
+
+    // Pass through to original handler for drag/selection
+    onPointerDown(e);
   };
 
   const handleBlur = () => {
@@ -73,7 +100,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
       $height={node.height}
       $isSelected={isSelected}
       $isDisabled={node.isDisabled}
-      onPointerDown={onPointerDown}
+      onPointerDown={handlePointerDownWithDoubleTap}
       onDoubleClick={handleDoubleClick}
       data-interactive
     >
