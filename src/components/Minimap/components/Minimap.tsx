@@ -81,10 +81,11 @@ function Minimap() {
       );
     });
 
-  // Handle mouse down to start dragging or jump to position
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Handle pointer down to start dragging or jump to position (supports mouse and touch)
+  const handlePointerDown = (e: React.PointerEvent) => {
     if (!containerRef.current) return;
     e.stopPropagation(); // Prevent interacting with the world behind
+    e.preventDefault(); // Prevent default touch behaviors
     const rect = containerRef.current.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
@@ -118,7 +119,7 @@ function Minimap() {
 
   useEffect(() => {
     let rafId: number | null = null;
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
       e.preventDefault();
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
@@ -135,25 +136,32 @@ function Minimap() {
       });
     };
 
-    const handleMouseUp = () => {
+    const handlePointerUp = () => {
+      setIsDragging(false);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
+
+    const handlePointerCancel = () => {
       setIsDragging(false);
       if (rafId) cancelAnimationFrame(rafId);
     };
 
     if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerCancel);
     }
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerCancel);
       if (rafId) cancelAnimationFrame(rafId);
     };
   }, [isDragging, dragOffset, updateViewportFromMinimap]);
 
   return (
-    <MapWrapper onMouseDown={handleMouseDown} ref={containerRef}>
+    <MapWrapper onPointerDown={handlePointerDown} ref={containerRef}>
       <svg
         width="100%"
         height="100%"
