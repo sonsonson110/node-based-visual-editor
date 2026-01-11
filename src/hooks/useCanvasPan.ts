@@ -17,21 +17,32 @@ export const useCanvasPan = ({
   const panStart = useRef({ x: 0, y: 0 });
   const panRaf = useRef<number | null>(null);
 
-  // Panning logic - mousedown handler
+  // Panning logic - pointerdown handler (supports mouse middle/right-click and touch)
   useEffect(() => {
     const container = worldContainerRef.current;
     if (!container) return;
 
-    function handleMouseDown(e: MouseEvent) {
+    function handlePointerDown(e: PointerEvent) {
       if (shouldPreventPanning) return;
-      if (e.button === 1 || e.button === 2) {
+
+      // Mouse: middle button (1) or right button (2)
+      // Touch: any touch (button will be 0 for touch)
+      const isMousePan =
+        e.pointerType === "mouse" && (e.button === 1 || e.button === 2);
+      const isTouchPan = e.pointerType === "touch";
+
+      if (isMousePan || isTouchPan) {
+        e.preventDefault();
         setIsPanning(true);
-        panStart.current = { x: e.pageX - viewport.x, y: e.pageY - viewport.y };
+        panStart.current = {
+          x: e.clientX - viewport.x,
+          y: e.clientY - viewport.y,
+        };
       }
     }
-    document.addEventListener("mousedown", handleMouseDown);
+    document.addEventListener("pointerdown", handlePointerDown);
     return () => {
-      document.removeEventListener("mousedown", handleMouseDown);
+      document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [
     dispatch,
@@ -41,33 +52,40 @@ export const useCanvasPan = ({
     worldContainerRef,
   ]);
 
-  // Panning logic - mousemove and mouseup handlers
+  // Panning logic - pointermove and pointerup handlers
   useEffect(() => {
-    function handleMouseMove(e: MouseEvent) {
+    function handlePointerMove(e: PointerEvent) {
       if (!isPanning) return;
+      e.preventDefault();
+
       if (panRaf.current) {
         cancelAnimationFrame(panRaf.current);
       }
       panRaf.current = requestAnimationFrame(() => {
         dispatch(
           setViewport({
-            ...viewport,
-            x: e.pageX - panStart.current.x,
-            y: e.pageY - panStart.current.y,
+            x: e.clientX - panStart.current.x,
+            y: e.clientY - panStart.current.y,
           })
         );
       });
     }
-    function handleMouseUp(e: MouseEvent) {
-      if (e.button === 1 || e.button === 2) {
+    function handlePointerUp(e: PointerEvent) {
+      // End panning for mouse middle/right button or any touch
+      const isMousePan =
+        e.pointerType === "mouse" && (e.button === 1 || e.button === 2);
+      const isTouchPan = e.pointerType === "touch";
+
+      if (isMousePan || isTouchPan) {
         setIsPanning(false);
       }
     }
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+
+    document.addEventListener("pointermove", handlePointerMove);
+    document.addEventListener("pointerup", handlePointerUp);
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("pointermove", handlePointerMove);
+      document.removeEventListener("pointerup", handlePointerUp);
       if (panRaf.current) {
         cancelAnimationFrame(panRaf.current);
       }

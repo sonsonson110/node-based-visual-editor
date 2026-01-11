@@ -8,7 +8,10 @@ const ControlPanel: React.FC = () => {
   const [isMinimized, setIsMinimized] = useState(false);
 
   return (
-    <PanelContainer onMouseDown={(e) => e.stopPropagation()}>
+    <PanelContainer
+      onMouseDown={(e) => e.stopPropagation()}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <PanelHeader
         $isMinimized={isMinimized}
         onClick={() => setIsMinimized(!isMinimized)}
