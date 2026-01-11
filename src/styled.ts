@@ -1,8 +1,8 @@
 import styled, { css, keyframes } from "styled-components";
 
 export const RootContainer = styled.div`
-  width: 100svw;
-  height: 100svh;
+  width: 100dvw;
+  height: 100dvh;
   background-color: #f0f0f0;
   position: relative;
   overflow: hidden;

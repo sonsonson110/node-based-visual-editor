@@ -40,6 +40,21 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
     if (isEditing && textareaRef.current) {
       textareaRef.current.focus();
       textareaRef.current.select();
+
+      // Handle click/touch outside to blur on touch devices
+      const handlePointerDownOutside = (e: PointerEvent) => {
+        if (
+          textareaRef.current &&
+          !textareaRef.current.contains(e.target as HTMLElement)
+        ) {
+          textareaRef.current.blur();
+        }
+      };
+
+      document.addEventListener("pointerdown", handlePointerDownOutside, true);
+      return () => {
+        document.removeEventListener("pointerdown", handlePointerDownOutside, true);
+      };
     }
   }, [isEditing]);
 
@@ -59,7 +74,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
     if (e.pointerType === "touch") {
       const now = Date.now();
       const timeSinceLastTap = now - lastTapTimeRef.current;
-      
+
       if (timeSinceLastTap < DOUBLE_TAP_DELAY) {
         e.preventDefault();
         e.stopPropagation();

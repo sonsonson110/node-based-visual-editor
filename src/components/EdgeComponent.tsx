@@ -41,6 +41,21 @@ function EdgeComponent({
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.select();
+
+      // Handle click/touch outside to blur on touch devices
+      const handlePointerDownOutside = (e: PointerEvent) => {
+        if (
+          inputRef.current &&
+          !inputRef.current.contains(e.target as HTMLElement)
+        ) {
+          inputRef.current.blur();
+        }
+      };
+
+      document.addEventListener("pointerdown", handlePointerDownOutside, true);
+      return () => {
+        document.removeEventListener("pointerdown", handlePointerDownOutside, true);
+      };
     }
   }, [isEditing]);
 
@@ -95,10 +110,10 @@ function EdgeComponent({
       onClick={onClick}
       onDoubleClick={handleDoubleClick}
       onPointerDown={handlePointerDown}
-      style={{ 
-        pointerEvents: "all", 
+      style={{
+        pointerEvents: "all",
         cursor: "pointer",
-        WebkitTapHighlightColor: "transparent" 
+        WebkitTapHighlightColor: "transparent",
       }}
       data-interactive
     >
