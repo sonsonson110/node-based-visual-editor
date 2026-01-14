@@ -7,4 +7,5 @@ export const useAppSelector = useSelector.withTypes<RootState>();
 
 export { useMapInteraction } from "./useMapInteraction";
 export { useMinimap } from "./useMinimap";
+export { useVisibleNodes } from "./useVisibleNodes";
 export { useWindowSize } from "./useWindowSize";
