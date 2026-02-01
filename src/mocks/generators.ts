@@ -33,6 +33,30 @@ function createSeededRandom(seed: number) {
   };
 }
 
+// Word lists for generating random text content
+const ADJECTIVES = ['Fast', 'Smart', 'Cool', 'New', 'Big', 'Red', 'Blue', 'Hot', 'Cold', 'Dark', 'Light', 'Fresh', 'Quick', 'Slow', 'Bright'];
+const NOUNS = ['Task', 'Node', 'Step', 'Flow', 'Data', 'API', 'Job', 'Event', 'Action', 'Block', 'Item', 'Process', 'Handler', 'Worker', 'Service'];
+const VERBS = ['Run', 'Send', 'Get', 'Set', 'Load', 'Save', 'Push', 'Pull', 'Start', 'Stop', 'Check', 'Filter', 'Map', 'Sort', 'Parse'];
+
+/**
+ * Generate random text content for nodes (< 30 chars)
+ */
+function generateNodeContent(random: () => number): string {
+  const adj = ADJECTIVES[Math.floor(random() * ADJECTIVES.length)];
+  const noun = NOUNS[Math.floor(random() * NOUNS.length)];
+  const num = Math.floor(random() * 100);
+  return `${adj} ${noun} ${num}`;
+}
+
+/**
+ * Generate random text label for edges (< 30 chars)
+ */
+function generateEdgeLabel(random: () => number): string {
+  const verb = VERBS[Math.floor(random() * VERBS.length)];
+  const noun = NOUNS[Math.floor(random() * NOUNS.length)].toLowerCase();
+  return `${verb} ${noun}`;
+}
+
 /**
  * Generate nodes in a grid pattern
  */
@@ -212,7 +236,7 @@ function generateEdges(
     const key = `${from}->${to}`;
     if (from === to || edgeSet.has(key)) return false;
     edgeSet.add(key);
-    edges.push({ from, to });
+    edges.push({ from, to, label: generateEdgeLabel(random) });
     return true;
   };
 
@@ -315,6 +339,12 @@ export function generateMockData(options: GeneratorOptions): { nodes: Node[]; ed
     default:
       nodes = generateGridNodes(nodeCount, spacing, nodeWidth, nodeHeight);
   }
+
+  // Add random content to each node
+  nodes = nodes.map((node) => ({
+    ...node,
+    content: generateNodeContent(random),
+  }));
 
   const edges = generateEdges(nodes, pattern, edgeDensity, random);
 
