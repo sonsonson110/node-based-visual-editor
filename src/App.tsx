@@ -5,9 +5,13 @@ import Minimap from "./components/Minimap";
 import NodeComponent from "./components/NodeComponent";
 import SelectionBox from "./components/SelectionBox";
 import { GRID_SIZE } from "./constants";
-import { useAppDispatch, useAppSelector, useMapInteraction } from "./hooks";
 import {
-  selectEdges,
+  useAppDispatch,
+  useAppSelector,
+  useMapInteraction,
+  useVisibleNodes,
+} from "./hooks";
+import {
   selectMapOrientation,
   selectNodes,
   selectSelectedEdgeIds,
@@ -16,7 +20,7 @@ import {
   setSelectedEdgeIds,
   setSelectedNodeIds,
   updateEdge,
-  updateNode,
+  updateNode
 } from "./store/editorSlice";
 import {
   PositionDisplay,
@@ -29,13 +33,15 @@ import { getEdgeId } from "./utils";
 function App() {
   const dispatch = useAppDispatch();
   const nodes = useAppSelector(selectNodes);
-  const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
   const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
   const mapOrientation = useAppSelector(selectMapOrientation);
 
   const worldContainerRef = useRef<HTMLDivElement>(null);
+
+  // Virtualization: only render nodes/edges within viewport
+  const { visibleNodes, visibleEdges } = useVisibleNodes();
 
   const {
     selectionBox,
@@ -111,7 +117,7 @@ function App() {
         }}
       >
         <SVGContainer>
-          {edges.map((edge) => {
+          {visibleEdges.map((edge) => {
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
             if (!fromNode || !toNode) return null;
@@ -141,7 +147,7 @@ function App() {
             );
           })}
         </SVGContainer>
-        {nodes.map((node) => (
+        {visibleNodes.map((node) => (
           <NodeComponent
             key={node.id}
             node={node}
@@ -151,7 +157,13 @@ function App() {
               if (e.button !== 0) return;
               e.preventDefault();
               e.stopPropagation();
-              handleNodePointerDown(e.clientX, e.clientY, node.id, e.shiftKey, e.pointerId);
+              handleNodePointerDown(
+                e.clientX,
+                e.clientY,
+                node.id,
+                e.shiftKey,
+                e.pointerId
+              );
             }}
             onResizePointerDown={(e) => {
               e.stopPropagation();
