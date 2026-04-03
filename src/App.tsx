@@ -157,6 +157,7 @@ function App() {
             node={node}
             isSelected={selectedNodeIdSet.has(node.id)}
             isResizing={resizingNodeId === node.id}
+            isDragging={draggedNodeId === node.id}
             onPointerDown={(e) => {
               if (e.button !== 0) return;
               e.preventDefault();

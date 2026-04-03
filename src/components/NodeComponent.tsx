@@ -13,6 +13,7 @@ interface NodeComponentProps extends React.HTMLAttributes<HTMLDivElement> {
   node: Node;
   isSelected: boolean;
   isResizing: boolean;
+  isDragging: boolean;
   onPointerDown: (e: React.PointerEvent) => void;
   onResizePointerDown: (e: React.PointerEvent) => void;
   onContentChange?: (newContent: string) => void;
@@ -22,6 +23,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
   node,
   isSelected,
   isResizing,
+  isDragging,
   onPointerDown,
   onResizePointerDown,
   onContentChange,
@@ -115,6 +117,7 @@ const NodeComponent: React.FC<NodeComponentProps> = ({
       $height={node.height}
       $isSelected={isSelected}
       $isDisabled={node.isDisabled}
+      $isDragging={isDragging}
       onPointerDown={handlePointerDownWithDoubleTap}
       onDoubleClick={handleDoubleClick}
       data-interactive

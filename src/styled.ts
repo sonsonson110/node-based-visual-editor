@@ -101,8 +101,9 @@ export const NodeContainer = styled.div<{
   $height: number;
   $isSelected: boolean;
   $isDisabled?: boolean;
+  $isDragging?: boolean;
 }>`
-  ${({ $x, $y, $width, $height, $isSelected, $isDisabled }) => {
+  ${({ $x, $y, $width, $height, $isSelected, $isDisabled, $isDragging }) => {
     const baseBorderColor = $isSelected ? "#007bff" : "#000000";
     const borderColor = $isDisabled ? `${baseBorderColor}80` : baseBorderColor;
 
@@ -115,6 +116,7 @@ export const NodeContainer = styled.div<{
       border-style: solid;
       border-color: ${borderColor};
       background: ${$isDisabled ? "#FFFFFF80" : "white"};
+      z-index: ${$isDragging ? 1 : 0};
 
       ${$isDisabled &&
       css`
