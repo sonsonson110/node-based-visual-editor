@@ -14,12 +14,9 @@ const ControlPanel: React.FC = () => {
       onMouseDown={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
     >
-      <PanelHeader
-        $isMinimized={isMinimized}
-        onClick={() => setIsMinimized(!isMinimized)}
-      >
+      <PanelHeader onClick={() => setIsMinimized(!isMinimized)}>
         <strong>Control Panel</strong>
-        <span>{isMinimized ? "▼" : "▲"}</span>
+        <span>{isMinimized ? "▾" : "▴"}</span>
       </PanelHeader>
       <Activity mode={isMinimized ? "hidden" : "visible"}>
         <PanelContent>
