@@ -1,16 +1,25 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { MINIMAP_HEIGHT, MINIMAP_WIDTH } from "../../../constants";
 import { useAppSelector, useMinimap } from "../../../hooks";
 import {
   selectSelectedEdgeIds,
   selectSelectedNodeIds,
 } from "../../../store/editorSlice";
+import {
+  selectMinimapConfig,
+  selectShowEdges,
+} from "../../../store/mapUiSlice";
 import { getEdgeId, getRectCenter } from "../../../utils";
 import { MapWrapper } from "../styled";
 
 function Minimap() {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
   const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
+  const {
+    opacity: minimapOpacity,
+    width: minimapWidth,
+    height: minimapHeight,
+  } = useAppSelector(selectMinimapConfig);
+  const showEdges = useAppSelector(selectShowEdges);
   const {
     minimapNodes,
     edges,
@@ -25,12 +34,12 @@ function Minimap() {
 
   const selectedNodeIdSet = useMemo(
     () => new Set(selectedNodeIds),
-    [selectedNodeIds]
+    [selectedNodeIds],
   );
 
   const selectedEdgeIdSet = useMemo(
     () => new Set(selectedEdgeIds),
-    [selectedEdgeIds]
+    [selectedEdgeIds],
   );
 
   const renderMinimapEdges = () =>
@@ -43,13 +52,13 @@ function Minimap() {
         fromNode.x,
         fromNode.y,
         fromNode.miniWidth,
-        fromNode.miniHeight
+        fromNode.miniHeight,
       );
       const toPos = getRectCenter(
         toNode.x,
         toNode.y,
         toNode.miniWidth,
-        toNode.miniHeight
+        toNode.miniHeight,
       );
       const edgeId = getEdgeId(edge.from, edge.to);
       const isSelected = selectedEdgeIdSet.has(edgeId);
@@ -161,14 +170,20 @@ function Minimap() {
   }, [isDragging, dragOffset, updateViewportFromMinimap]);
 
   return (
-    <MapWrapper onPointerDown={handlePointerDown} ref={containerRef}>
+    <MapWrapper
+      onPointerDown={handlePointerDown}
+      ref={containerRef}
+      $width={minimapWidth}
+      $height={minimapHeight}
+      $opacity={minimapOpacity}
+    >
       <svg
         width="100%"
         height="100%"
-        viewBox={`0 0 ${MINIMAP_WIDTH} ${MINIMAP_HEIGHT}`}
+        viewBox={`0 0 ${minimapWidth} ${minimapHeight}`}
         style={{ display: "block" }}
       >
-        {renderMinimapEdges()}
+        {showEdges && renderMinimapEdges()}
         {renderMinimapNodes()}
 
         <rect

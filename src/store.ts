@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { editorSlice } from "./store/editorSlice";
+import { mapUiSlice } from "./store/mapUiSlice";
 
 export const store = configureStore({
   reducer: {
     editor: editorSlice.reducer,
+    mapUi: mapUiSlice.reducer,
   },
 });
 

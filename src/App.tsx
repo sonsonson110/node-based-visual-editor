@@ -22,6 +22,7 @@ import {
   updateEdge,
   updateNode
 } from "./store/editorSlice";
+import { selectMinimapConfig, selectShowEdges } from "./store/mapUiSlice";
 import {
   PositionDisplay,
   RootContainer,
@@ -37,6 +38,8 @@ function App() {
   const selectedNodeIds = useAppSelector(selectSelectedNodeIds);
   const selectedEdgeIds = useAppSelector(selectSelectedEdgeIds);
   const mapOrientation = useAppSelector(selectMapOrientation);
+  const minimapConfig = useAppSelector(selectMinimapConfig);
+  const showEdges = useAppSelector(selectShowEdges);
 
   const worldContainerRef = useRef<HTMLDivElement>(null);
 
@@ -117,35 +120,36 @@ function App() {
         }}
       >
         <SVGContainer>
-          {visibleEdges.map((edge) => {
-            const fromNode = nodeMap.get(edge.from);
-            const toNode = nodeMap.get(edge.to);
-            if (!fromNode || !toNode) return null;
-            const edgeId = getEdgeId(edge.from, edge.to);
+          {showEdges &&
+            visibleEdges.map((edge) => {
+              const fromNode = nodeMap.get(edge.from);
+              const toNode = nodeMap.get(edge.to);
+              if (!fromNode || !toNode) return null;
+              const edgeId = getEdgeId(edge.from, edge.to);
 
-            return (
-              <EdgeComponent
-                key={edgeId}
-                fromNode={fromNode}
-                toNode={toNode}
-                orientation={mapOrientation}
-                isSelected={selectedEdgeIdSet.has(edgeId)}
-                onClick={(e) => handleEdgeClick(e, edgeId)}
-                color={edge.color}
-                isAnimated={edge.isAnimated}
-                label={edge.label}
-                onLabelChange={(newLabel) =>
-                  dispatch(
-                    updateEdge({
-                      from: edge.from,
-                      to: edge.to,
-                      label: newLabel,
-                    })
-                  )
-                }
-              />
-            );
-          })}
+              return (
+                <EdgeComponent
+                  key={edgeId}
+                  fromNode={fromNode}
+                  toNode={toNode}
+                  orientation={mapOrientation}
+                  isSelected={selectedEdgeIdSet.has(edgeId)}
+                  onClick={(e) => handleEdgeClick(e, edgeId)}
+                  color={edge.color}
+                  isAnimated={edge.isAnimated}
+                  label={edge.label}
+                  onLabelChange={(newLabel) =>
+                    dispatch(
+                      updateEdge({
+                        from: edge.from,
+                        to: edge.to,
+                        label: newLabel,
+                      })
+                    )
+                  }
+                />
+              );
+            })}
         </SVGContainer>
         {visibleNodes.map((node) => (
           <NodeComponent
@@ -177,7 +181,7 @@ function App() {
         ))}
       </WorldContainer>
       <SelectionBox selectionBox={selectionBox} />
-      <Minimap />
+      {minimapConfig.isVisible && <Minimap />}
     </RootContainer>
   );
 }

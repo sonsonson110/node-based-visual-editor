@@ -1,1 +1,1 @@
-export { default } from "./components/MinimapToggle";
+export { default } from "./components/Minimap";

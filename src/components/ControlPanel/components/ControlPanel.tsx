@@ -1,6 +1,7 @@
 import React, { Activity, useState } from "react";
 import { DatasetGroup } from "./DatasetGroup";
 import { EdgeGroup } from "./EdgeGroup";
+import { MapUiGroup } from "./MapUiGroup";
 import { NodeGroup } from "./NodeGroup";
 import { OrientationGroup } from "./OrientationGroup";
 import { PanelContainer, PanelContent, PanelHeader } from "../styled";
@@ -26,6 +27,7 @@ const ControlPanel: React.FC = () => {
           <NodeGroup />
           <EdgeGroup />
           <OrientationGroup />
+          <MapUiGroup />
         </PanelContent>
       </Activity>
     </PanelContainer>

@@ -1,15 +1,12 @@
 import { useMemo } from "react";
 import { useAppDispatch, useAppSelector, useWindowSize } from ".";
 import {
-  MINIMAP_HEIGHT,
-  MINIMAP_WIDTH
-} from "../constants";
-import {
   selectEdges,
   selectNodes,
   selectViewport,
   setViewport,
 } from "../store/editorSlice";
+import { selectMinimapConfig } from "../store/mapUiSlice";
 import type { WorldBounds } from "../types";
 import { clamp, screenToWorld } from "../utils";
 
@@ -18,6 +15,8 @@ export function useMinimap() {
   const nodes = useAppSelector(selectNodes);
   const edges = useAppSelector(selectEdges);
   const viewport = useAppSelector(selectViewport);
+  const { width: MINIMAP_WIDTH, height: MINIMAP_HEIGHT } =
+    useAppSelector(selectMinimapConfig);
 
   // Track window size for viewport calculations
   const { width: screenWidth, height: screenHeight } = useWindowSize();
@@ -52,7 +51,7 @@ export function useMinimap() {
     const scaleX = MINIMAP_WIDTH / worldBounds.width;
     const scaleY = MINIMAP_HEIGHT / worldBounds.height;
     return Math.min(scaleX, scaleY);
-  }, [worldBounds]);
+  }, [worldBounds, MINIMAP_WIDTH, MINIMAP_HEIGHT]);
 
   // Apply viewport zoom to minimap scale, clamped to always fit all content at minimum
   const minimapScale = useMemo(() => {
@@ -105,7 +104,7 @@ export function useMinimap() {
     }
 
     return { x: offsetX, y: offsetY };
-  }, [worldBounds, minimapScale, viewport, screenWidth, screenHeight, scaledContentSize]);
+  }, [worldBounds, minimapScale, viewport, screenWidth, screenHeight, scaledContentSize, MINIMAP_WIDTH, MINIMAP_HEIGHT]);
 
   const minimapNodes = useMemo(() => {
     return nodes.map((node) => ({
