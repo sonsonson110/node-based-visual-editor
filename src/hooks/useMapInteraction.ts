@@ -21,7 +21,7 @@ export const useMapInteraction = ({
     shouldPreventPanning: !!draggedNodeId || !!resizingNodeId,
   });
 
-  useCanvasZoom();
+  useCanvasZoom(worldContainerRef);
 
   const selectionBox = useSelectionBox({
     draggedNodeId,
